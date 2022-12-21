@@ -13,3 +13,4 @@
 13.	"property_documents" - tabela zawierająca dokumenty związane z danym nieruchomością
 14.	"property_market_comparisons" - tabela zawierająca porównania rynkowe dla danej nieruchomości, takie jak ceny podobnych nieruchomości w tej samej lokalizacji lub o podobnych cechach
 15.	"property_market_trends" - tabela zawierająca informacje o trendach na rynku nieruchomości, takie jak średnie ceny w danym rejonie lub wzrost/spadek cen w określonym czasie.
+16.???
