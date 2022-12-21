@@ -30,17 +30,19 @@ IF OBJECT_ID('Pracownicy','U') IS NOT NULL
 
 CREATE TABLE Nieruchomości (
 	ID_nieruchomości INT PRIMARY KEY,
-    Rynek VARCHAR(9)
-    CHECK (Rynek LIKE 'Pierwotny' OR Rynek LIKE 'Wtórny'),
-    Rodzaj_umowy VARCHAR(8)
-    CHECK (Rodzaj_umowy LIKE 'Wynajem' OR Rodzaj_umowy LIKE 'Kupno'),
+    Rynek VARCHAR(9),
+    Rodzaj_umowy VARCHAR(8),
 	Ulica VARCHAR(200) NULL,
 	Numer INT NOT NULL,
 	Miejscowość VARCHAR(200) NOT NULL,
-    Nazwa_regionu VARCHAR(200),
-	Powierzchnia INT,
+    Nazwa_regionu VARCHAR(200) NULL,
+	Powierzchnia INT NULL,
 	Liczba_pokoi INT NULL,
-	Cena INT
+	Cena INT NOT NULL,
+
+    CHECK (Rynek LIKE 'Pierwotny' OR Rynek LIKE 'Wtórny'),
+    CHECK (Rodzaj_umowy LIKE 'Wynajem' OR Rodzaj_umowy LIKE 'Kupno'),
+    CHECK (Cena > 0)
 )
 
 CREATE TABLE Klienci (
@@ -62,6 +64,7 @@ CREATE TABLE Pracownicy (
 CREATE TABLE Cechy_nieruchomości (
     ID_nieruchomości INT,
     Nazwa_cechy VARCHAR(200) NOT NULL,
+
     FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości)
 )
 
@@ -70,6 +73,7 @@ CREATE TABLE Terminy_oglądania (
     Id_zwiedzającego INT,
     Data_zwiedzania DATETIME NOT NULL,
     Miejsce_zwiedzania INT,
+
     FOREIGN KEY (Id_zwiedzającego) REFERENCES Klienci(ID_klienta),    
     FOREIGN KEY (Miejsce_zwiedzania) REFERENCES Nieruchomości(ID_nieruchomości)
 )
@@ -80,6 +84,7 @@ CREATE TABLE Oferty_kupna (
     Pracownik_obsługujący INT,
     Data_wystawienia DATETIME NOT NULL,
     Data_zakończenia DATETIME NOT NULL,
+
     FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości),
     FOREIGN KEY (Pracownik_obsługujący) REFERENCES Pracownicy(ID_pracownika),
 
@@ -93,6 +98,7 @@ CREATE TABLE Sprzedane_nieruchomości (
     ID_kupującego INT,
     Data_sprzedania DATETIME NOT NULL,    
     Mnożnik_ceny FLOAT DEFAULT 1,
+
     FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości),
     FOREIGN KEY (Pracownik_obsługujący) REFERENCES Pracownicy(ID_pracownika),
     FOREIGN KEY (ID_kupującego) REFERENCES Pracownicy(ID_pracownika)
@@ -113,6 +119,7 @@ CREATE TABLE Rezerwacje (
     ID_klienta INT,
     Początek DATETIME NOT NULL,
     Koniec DATETIME NOT NULL,
+
     FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości),
     FOREIGN KEY (ID_klienta) REFERENCES Klienci(ID_klienta),
 
@@ -125,6 +132,7 @@ CREATE TABLE Umowy (
     ID_nieruchomości INT,
     Początek_najmu DATETIME NOT NULL,
     Koniec_najmu DATETIME NOT NULL,
+
     FOREIGN KEY (ID_klienta) REFERENCES Klienci(ID_klienta),
     FOREIGN KEY (ID_pracownika) REFERENCES Pracownicy(ID_pracownika),
     FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości),
