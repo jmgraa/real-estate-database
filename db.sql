@@ -15,28 +15,21 @@ CREATE TABLE Klienci (
 	ID_klienta INT PRIMARY KEY,
 	Imię VARCHAR(200),
     Nazwisko VARCHAR(200),
-    Numer_telefonu VARCHAR(12)
+    Numer_telefonu VARCHAR(12),
+    Adres_email VARCHAR(200)
 )
 
 CREATE TABLE Pracownicy (
 	ID_pracownika INT PRIMARY KEY,
 	Imię VARCHAR(200),
     Nazwisko VARCHAR(200),
-    Ulica VARCHAR(200),
-	Numer INT NOT NULL,
-	Miejscowość VARCHAR(200) NOT NULL,
     Numer_telefonu VARCHAR(12),
     Stanowisko VARCHAR(200),
 )
 
-CREATE TABLE Cechy (
-    ID_cechy INT PRIMARY KEY,
-    Nazwa_cechy VARCHAR(200) NOT NULL
-)
-
 CREATE TABLE Cechy_nieruchomości (
     ID_nieruchomości INT,
-    ID_cechy INT,
+    Nazwa_cechy VARCHAR(200) NOT NULL,
     FOREIGN KEY ID_nieruchomości REFERENCES Nieruchomości(ID_nieruchomości),
     FOREIGN KEY ID_cechy REFERENCES Cechy(ID_cechy)
 )
@@ -79,4 +72,24 @@ CREATE TABLE Trendy_rynkowe (
     Region VARCHAR(200),
     Zmiana_mnożnika FLOAT,
     FOREIGN KEY Region REFERENCES Nieruchomości(Nazwa_regionu)
+)
+
+CREATE TABLE Rezerwacje (
+    ID_nieruchomości INT,
+    ID_klienta INT,
+    Początek DATETIME,
+    Koniec DATETIME,
+    FOREIGN KEY ID_nieruchomości REFERENCES Nieruchomości(ID_nieruchomości),
+    FOREIGN KEY ID_klienta REFERENCES Klienci(ID_klienta)
+)
+
+CREATE TABLE Umowy (
+    ID_klienta INT,
+    ID_pracownika INT,
+    ID_nieruchomości INT,
+    Początek_najmu DATETIME,
+    Koniec_najmu DATETIME,
+    FOREIGN KEY ID_klienta REFERENCES Klienci(ID_klienta),
+    FOREIGN KEY ID_pracownika REFERENCES Pracownicy(ID_pracownika),
+    FOREIGN KEY ID_nieruchomości REFERENCES Nieruchomości(ID_nieruchomości)
 )
