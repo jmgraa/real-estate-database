@@ -1,3 +1,22 @@
+Spis tabel:
+1. Nieruchomości
+2. Dom (dz. nieruchomości)
+3. Mieszkanie (dz. nieruchomości)
+4. Działka (dz. nieruchomości)
+5. Klienci
+6. Pracownicy
+7. Cechy nieruchomości
+8. Terminy oglądania
+9. Wszystkie oferty
+10. Aktualne oferty (dz. wszystkie oferty)
+11. Niesprzedane (dz. wszystkie oferty)
+12. Sprzedane (dz. wszystkie oferty)
+13. Trendy rynkowe
+14. Rezerwacje
+15. Umowy
+16. Opinie
+
+
 ZROBIONE 1.	"properties" - tabela zawierająca informacje o nieruchomościach, takie jak adres, powierzchnia, liczba pokoi, cena itp.
 ZROBIONE 2.	"clients" - tabela zawierająca informacje o klientach, takie jak imię, nazwisko, adres, numer telefonu itp.
 ZROBIONE 3.	"employees" - tabela zawierająca informacje o pracownikach firmy, takie jak imię, nazwisko, stanowisko, wynagrodzenie itp.
