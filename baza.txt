@@ -3,18 +3,20 @@ Spis tabel:
 2. Dom (dz. nieruchomości)
 3. Mieszkanie (dz. nieruchomości)
 4. Działka (dz. nieruchomości)
-5. Klienci
-6. Pracownicy
-7. Cechy nieruchomości
-8. Terminy oglądania
-9. Wszystkie oferty
-10. Aktualne oferty (dz. wszystkie oferty)
-11. Niesprzedane (dz. wszystkie oferty)
-12. Sprzedane (dz. wszystkie oferty)
-13. Trendy rynkowe
-14. Rezerwacje
-15. Umowy
+5. Osoby
+6. Klienci
+7. Pracownicy
+8. Cechy nieruchomości
+9. Terminy oglądania
+10. Wszystkie oferty
+11. Aktualne oferty (dz. wszystkie oferty)
+12. Niesprzedane (dz. wszystkie oferty)
+13. Sprzedane (dz. wszystkie oferty)
+14. Trendy rynkowe
+15. Rezerwacje
 16. Opinie
+
+dom, mieszkanie, działka - DO UZUPEŁNIENIA
 
 Procedury:
 - dodanie ogłoszenia
