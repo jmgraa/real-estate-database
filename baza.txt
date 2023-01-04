@@ -16,16 +16,16 @@ Spis tabel:
 15. Umowy
 16. Opinie
 
-Funkcje:
+Procedury:
 - dodanie ogłoszenia
 - dodanie opinii
 - rezerwacja terminu oglądania (sprawdzenie czy dany pracownik ma wtedy czas)
 - wprowadzenie nowego trendu rynkowego, bądź jego zakończenie
-- dodanie pracownika
-
+- zmiana terminu ogłoszenia jeżeli użytkownik jest pracownikiem obsługującym zlecenie
 
 Wyzwalacze:
-- automatyczne przydzielenie pracownika o najmniejszej ilości aktualnych zleceń
+- automatyczne przydzielenie pracownika o najmniejszej ilości aktualnych zleceń do zlecenia
 - zmiana ceny w zależności od trendów rynkowych
-- odjęcie od licznika zleceń pracownika, jeżeli zlecenie się zakończyło
+- odjęcie od licznika zleceń pracownika jeżeli zlecenie się zakończyło
+- przeniesienie oferty do zakończonych niesprzedanych jeżeli minął termin
 - ???
