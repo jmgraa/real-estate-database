@@ -37,24 +37,25 @@ IF OBJECT_ID('Rezerwacje','U') IS NOT NULL
 IF OBJECT_ID('Opinie','U') IS NOT NULL
 	DROP TABLE Opinie
 
-IF OBJECT_ID('Nieruchomości','U') IS NOT NULL
-	DROP TABLE Nieruchomości
-
 IF OBJECT_ID('Klienci','U') IS NOT NULL
 	DROP TABLE Klienci
 
 IF OBJECT_ID('Pracownicy','U') IS NOT NULL
 	DROP TABLE Pracownicy
 
-IF OBJECT_ID('Osoba', 'U') IS NOT NULL
-    DROP TABLE Osoba
+IF OBJECT_ID('Osoby', 'U') IS NOT NULL
+    DROP TABLE Osoby
+
+IF OBJECT_ID('Nieruchomości','U') IS NOT NULL
+	DROP TABLE Nieruchomości
 
 CREATE TABLE Nieruchomości (
 	ID_nieruchomości INT PRIMARY KEY,
+
 	Ulica VARCHAR(200) NULL,
 	Numer INT NOT NULL,
 	Miejscowość VARCHAR(200) NOT NULL,
-    Nazwa_regionu VARCHAR(200) NULL,
+
 	Powierzchnia INT NOT NULL,
 	Cena INT NOT NULL,
     Możliwość_negocjacji_ceny BIT NOT NULL,
@@ -63,44 +64,52 @@ CREATE TABLE Nieruchomości (
     CHECK (Cena > 0)
 )
 
-CREATE TABLE Dom (
+CREATE TABLE Domy (
     ID_domu INT REFERENCES Nieruchomości PRIMARY KEY,
-    Liczba_pokoi INT,
-    Liczba_pięter INT,
+
+    Rodzaj_zabudowy VARCHAR(200),
+    Liczba_pokoi INT NOT NULL,
+    Liczba_pięter INT NOT NULL,
     Rodzaj_ogrzewania VARCHAR(200),
 )
 
-CREATE TABLE Mieszkanie (
+CREATE TABLE Mieszkania (
     ID_mieszkania INT REFERENCES Nieruchomości PRIMARY KEY,
+
+    Rodzaj_zabudowy VARCHAR(200),
     Piętro INT,
     Ogrzewanie_z_sieci BIT,
-    Winda_w_budynku BIT,
-    Rodzaj_budynku VARCHAR(200),
+    Winda_w_budynku BIT
 )
 
-CREATE TABLE Działka (
+CREATE TABLE Działki (
     ID_działki INT REFERENCES Nieruchomości PRIMARY KEY,
+
+    Rodzaj_dzialki VARCHAR(200),
     Dostep_do_pradu BIT NOT NULL,
     Dostep_do_gazu BIT NOT NULL,
     Dostep_do_wody BIT NOT NULL,
     Dostep_do_kanalizacji BIT NOT NULL,
-    Inne_media VARCHAR(200) NULL,
 )
 
-CREATE TABLE Osoba (
-    Pesel INT PRIMARY KEY,
+CREATE TABLE Osoby (
+    Pesel VARCHAR(11) PRIMARY KEY,
+
     Imię VARCHAR(200) NOT NULL,
     Nazwisko VARCHAR(200) NOT NULL,
     Numer_telefonu VARCHAR(12) NOT NULL
 )
 
 CREATE TABLE Klienci (
-	ID_klienta INT REFERENCES Osoba PRIMARY KEY,
+	ID_klienta VARCHAR(11) REFERENCES Osoby PRIMARY KEY,
+
     Adres_email VARCHAR(200) NULL
 )
 
 CREATE TABLE Pracownicy (
-	ID_pracownika INT  REFERENCES Osoba PRIMARY KEY,
+	ID_pracownika VARCHAR(11) REFERENCES Osoby PRIMARY KEY,
+
+    Liczba_aktualnych_zleceń INT DEFAULT 0,
     Stanowisko VARCHAR(200) NOT NULL,
 )
 
@@ -115,8 +124,9 @@ CREATE TABLE Cechy_nieruchomości (
 
 CREATE TABLE Terminy_oglądania (
     ID_terminu INT PRIMARY KEY,
-    ID_oglądającego INT,
-    ID_pracownika INT,
+
+    ID_oglądającego VARCHAR(11),
+    ID_pracownika VARCHAR(11),
     Data_zwiedzania DATETIME NOT NULL,
     Miejsce_zwiedzania INT,
 
@@ -127,8 +137,9 @@ CREATE TABLE Terminy_oglądania (
 
 CREATE TABLE Wszystkie_oferty (
     ID_oferty INT PRIMARY KEY,
+
     ID_nieruchomości INT,
-    Pracownik_obsługujący INT,
+    Pracownik_obsługujący VARCHAR(11) NOT NULL,
     Data_wystawienia DATETIME NOT NULL,
     Data_zakończenia DATETIME NOT NULL,
 
@@ -148,7 +159,8 @@ CREATE TABLE Niesprzedane (
 
 CREATE TABLE Sprzedane (
     ID_sprzedane INT REFERENCES Wszystkie_oferty PRIMARY KEY,
-    ID_kupującego INT NOT NULL,
+
+    ID_kupującego VARCHAR(11) NOT NULL,
     Data_sprzedania DATETIME NOT NULL,    
     Mnożnik_ceny FLOAT DEFAULT 1,
 
@@ -157,10 +169,11 @@ CREATE TABLE Sprzedane (
 
 CREATE TABLE Trendy_rynkowe (
     ID_trendu INT PRIMARY KEY,
+
     Nazwa_trendu VARCHAR(200) NOT NULL,
     Rozpoczęcie DATETIME NOT NULL,
-    Zakończenie DATETIME,
-    Region VARCHAR(200) NOT NULL,
+    Zakończenie DATETIME NULL,
+    Miejscowość VARCHAR(200) NOT NULL UNIQUE,
     Zmiana_mnożnika FLOAT NOT NULL,
 
     CHECK (Rozpoczęcie < Zakończenie)
@@ -169,7 +182,7 @@ CREATE TABLE Trendy_rynkowe (
 CREATE TABLE Rezerwacje (
     ID_rezerwacji INT PRIMARY KEY,
     ID_nieruchomości INT,
-    ID_klienta INT,
+    ID_klienta VARCHAR(11),
     Początek DATETIME NOT NULL,
     Koniec DATETIME NOT NULL,
 
@@ -181,8 +194,9 @@ CREATE TABLE Rezerwacje (
 
 CREATE TABLE Opinie (
     ID_opinii INT PRIMARY KEY,
-    ID_klienta INT NOT NULL,
-    ID_pracownika INT NOT NULL,
+
+    ID_klienta VARCHAR(11) NOT NULL,
+    ID_pracownika VARCHAR(11) NOT NULL,
     ID_nieruchomości INT NOT NULL,
     Data_wystawienia_opinii DATETIME NOT NULL,
     Ocena INT,
