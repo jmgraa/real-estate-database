@@ -12,7 +12,7 @@ Spis tabel:
 11. Aktualne oferty (dz. wszystkie oferty)
 12. Niesprzedane (dz. wszystkie oferty)
 13. Sprzedane (dz. wszystkie oferty) UZUPEŁNIONE
-14. Trendy rynkowe
+14. Trendy rynkowe UZUPEŁNIONE (chociaż można trochę zmienić daty i miejscowości)
 15. Rezerwacje
 16. Opinie UZUPEŁNIONE
 
