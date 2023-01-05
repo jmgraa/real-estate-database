@@ -1,11 +1,11 @@
-IF OBJECT_ID('Dom','U') IS NOT NULL
-	DROP TABLE Dom
+IF OBJECT_ID('Domy','U') IS NOT NULL
+	DROP TABLE Domy
 
-IF OBJECT_ID('Mieszkanie','U') IS NOT NULL
-	DROP TABLE Mieszkanie
+IF OBJECT_ID('Mieszkania','U') IS NOT NULL
+	DROP TABLE Mieszkania
 
-IF OBJECT_ID('Działka','U') IS NOT NULL
-	DROP TABLE Działka
+IF OBJECT_ID('Działki','U') IS NOT NULL
+	DROP TABLE Działki
 
 IF OBJECT_ID('Cechy_nieruchomości','U') IS NOT NULL
 	DROP TABLE Cechy_nieruchomości
