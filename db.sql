@@ -50,7 +50,7 @@ IF OBJECT_ID('Nieruchomości','U') IS NOT NULL
 	DROP TABLE Nieruchomości
 
 CREATE TABLE Nieruchomości (
-	ID_nieruchomości INT PRIMARY KEY,
+	ID_nieruchomości INT IDENTITY(1,1) PRIMARY KEY,
 
 	Ulica VARCHAR(200) NULL,
 	Numer INT NOT NULL,
@@ -136,7 +136,7 @@ CREATE TABLE Terminy_oglądania (
 )
 
 CREATE TABLE Wszystkie_oferty (
-    ID_oferty INT PRIMARY KEY,
+    ID_oferty INT IDENTITY(1,1) PRIMARY KEY,
 
     ID_nieruchomości INT,
     Pracownik_obsługujący VARCHAR(11) NOT NULL,
@@ -168,7 +168,7 @@ CREATE TABLE Sprzedane (
 )
 
 CREATE TABLE Trendy_rynkowe (
-    ID_trendu INT PRIMARY KEY,
+    ID_trendu INT IDENTITY(1,1) PRIMARY KEY,
 
     Nazwa_trendu VARCHAR(200) NOT NULL,
     Rozpoczęcie DATETIME NOT NULL,
@@ -180,7 +180,7 @@ CREATE TABLE Trendy_rynkowe (
 )
 
 CREATE TABLE Rezerwacje (
-    ID_rezerwacji INT PRIMARY KEY,
+    ID_rezerwacji INT IDENTITY(1,1) PRIMARY KEY,
     ID_nieruchomości INT,
     ID_klienta VARCHAR(11),
     Początek DATETIME NOT NULL,
@@ -193,18 +193,14 @@ CREATE TABLE Rezerwacje (
 )
 
 CREATE TABLE Opinie (
-    ID_opinii INT PRIMARY KEY,
+    ID_opinii INT IDENTITY(1,1) PRIMARY KEY,
 
-    ID_klienta VARCHAR(11) NOT NULL,
-    ID_pracownika VARCHAR(11) NOT NULL,
-    ID_nieruchomości INT NOT NULL,
+    ID_oferty INT,
     Data_wystawienia_opinii DATETIME NOT NULL,
     Ocena INT,
-    Opis VARCHAR(500),
+    Opis VARCHAR(MAX),
 
-    FOREIGN KEY (ID_klienta) REFERENCES Klienci(ID_klienta),
-    FOREIGN KEY (ID_pracownika) REFERENCES Pracownicy(ID_pracownika),
-    FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości),
+    FOREIGN KEY (ID_oferty) REFERENCES Sprzedane(ID_sprzedane),
 
     CHECK (Ocena BETWEEN 0 AND 10)
 )

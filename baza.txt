@@ -1,20 +1,20 @@
 Spis tabel:
-1. Nieruchomości
-2. Dom (dz. nieruchomości)
-3. Mieszkanie (dz. nieruchomości)
-4. Działka (dz. nieruchomości)
-5. Osoby
-6. Klienci
-7. Pracownicy
+1. Nieruchomości UZUPEŁNIONE
+2. Domy (dz. nieruchomości) UZUPEŁNIONE
+3. Mieszkania (dz. nieruchomości) UZUPEŁNIONE
+4. Działki (dz. nieruchomości) UZUPEŁNIONE
+5. Osoby UZUPEŁNIONE
+6. Klienci UZUPEŁNIONE
+7. Pracownicy UZUPEŁNIONE
 8. Cechy nieruchomości
 9. Terminy oglądania
-10. Wszystkie oferty
+10. Wszystkie oferty UZUPEŁNIONE
 11. Aktualne oferty (dz. wszystkie oferty)
 12. Niesprzedane (dz. wszystkie oferty)
-13. Sprzedane (dz. wszystkie oferty)
+13. Sprzedane (dz. wszystkie oferty) UZUPEŁNIONE
 14. Trendy rynkowe
 15. Rezerwacje
-16. Opinie
+16. Opinie UZUPEŁNIONE
 
 Trzeba skończyć dodawanie danych i można się brać za widoki / funkcje.
 
