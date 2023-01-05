@@ -18,6 +18,19 @@ Spis tabel:
 
 Trzeba skończyć dodawanie danych i można się brać za widoki / funkcje.
 
+Widoki:
+
+1. aktualne oferty z danego miasta
+2. aktualne oferty danego typu nieruchomości
+3. suma wartości nieruchomości z każdego miasta
+4. liczba ofert w miesiącu
+5. wyświetlenie pracowników razem z liczbą terminów, w których ktoś oglądał ich nieruchomość
+6. wyświetlenie opinii każdego pracownika, sortując od najlepszych
+7. wyświetlenie dla każdego pracownika liczby aktualnych, sprzedanych i niesprzedanych nieruchomości
+8. ???
+9. ???
+10. ???
+
 Procedury:
 - dodanie ogłoszenia
 - dodanie opinii
