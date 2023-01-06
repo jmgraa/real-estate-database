@@ -9,3 +9,8 @@ INNER JOIN Osoby Os ON
 Os.Pesel = P.ID_pracownika
 GROUP BY P.ID_pracownika,Os.Imię, Os.Nazwisko
 ORDER BY Średnia_ocena DESC
+
+
+CREATE VIEW Liczba_ofert_w_miesiacu AS
+SELECT MONTH(Data_wystawienia) AS [Numer Miesiaca], COUNT(MONTH(Data_wystawienia)) AS [Liczba ofert w miesiacu] FROM Wszystkie_oferty
+GROUP BY MONTH(Data_wystawienia)
