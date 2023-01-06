@@ -14,3 +14,7 @@ ORDER BY Średnia_ocena DESC
 CREATE VIEW Liczba_ofert_w_miesiacu AS
 SELECT MONTH(Data_wystawienia) AS [Numer Miesiaca], COUNT(MONTH(Data_wystawienia)) AS [Liczba ofert w miesiacu] FROM Wszystkie_oferty
 GROUP BY MONTH(Data_wystawienia)
+
+CREATE VIEW Suma_wartosci AS
+SELECT Miejscowość, SUM(Cena) AS [Suma nieruchomosci] FROM Nieruchomości
+GROUP BY Miejscowość
