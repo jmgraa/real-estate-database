@@ -25,3 +25,24 @@ BEGIN
 		FROM inserted;
     END;
 END;
+
+
+CREATE TRIGGER Aktualizuj_ceny
+ON Trendy_rynkowe
+AFTER INSERT
+AS
+BEGIN
+  UPDATE nieruchomości
+  SET nieruchomości.Cena = nieruchomości.Cena + nieruchomości.Cena * i.Zmiana_Mnożnika
+  FROM nieruchomości
+  INNER JOIN inserted i
+    ON nieruchomości.Miejscowość = i.Miejscowość
+  WHERE i.Nazwa_trendu = 'wzrost'
+
+  UPDATE nieruchomości
+  SET nieruchomości.Cena = nieruchomości.Cena - nieruchomości.Cena * i.Zmiana_Mnożnika
+  FROM nieruchomości
+  INNER JOIN inserted i
+    ON nieruchomości.Miejscowość = i.Miejscowość
+  WHERE i.Nazwa_trendu = 'spadek'
+END
