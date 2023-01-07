@@ -30,8 +30,9 @@ RETURN
 	WHERE N.Miejscowość = @x;
   
   
-  
-  CREATE FUNCTION Aktualne_oferty_z_miasta(@x VARCHAR(200))
+ 
+ 
+CREATE FUNCTION Aktualne_oferty_z_miasta(@x VARCHAR(200))
 RETURNS TABLE
 AS
 RETURN
@@ -39,3 +40,40 @@ RETURN
 	LEFT JOIN Aktualne_oferty A ON
 	N.ID_nieruchomości = A.ID_aktualne
 	WHERE N.Miejscowość = @x;
+	
+
+
+
+CREATE FUNCTION Oferty_typu(@x VARCHAR(200))
+RETURNS @result TABLE (ID_nieruchomosci int, Ulica VARCHAR(200), Numer int,Miejscowość VARCHAR(200),Powierzchnia INT,Cena INT, Możliwość_negocjacji_ceny BIT)
+AS
+BEGIN
+
+	IF @x = 'Domy'
+	BEGIN
+		INSERT INTO @result
+		SELECT N.ID_nieruchomości, N.Ulica, N.Numer, N.Miejscowość, N.Powierzchnia, N.Cena, N.Możliwość_negocjacji_ceny FROM Domy
+		LEFT JOIN Nieruchomości N ON
+		ID_domu = N.ID_nieruchomości
+	END
+	ELSE IF @x = 'Działki'
+	BEGIN
+		INSERT INTO @result
+		SELECT N.ID_nieruchomości, N.Ulica, N.Numer, N.Miejscowość, N.Powierzchnia, N.Cena, N.Możliwość_negocjacji_ceny FROM Działki
+		LEFT JOIN Nieruchomości N ON
+		ID_działki = N.ID_nieruchomości
+	END
+	ELSE IF @x = 'Mieszkania'
+	BEGIN
+		INSERT INTO @result
+		SELECT N.ID_nieruchomości, N.Ulica, N.Numer, N.Miejscowość, N.Powierzchnia, N.Cena, N.Możliwość_negocjacji_ceny FROM Mieszkania
+		LEFT JOIN Nieruchomości N ON
+		ID_mieszkania = N.ID_nieruchomości
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @result
+		SELECT NULL, NULL, NULL, NULL, NULL,NULL,NULL
+		END
+	RETURN
+END
