@@ -20,17 +20,7 @@ SELECT Miejscowość, SUM(Cena) AS [Suma nieruchomosci] FROM Nieruchomości
 GROUP BY Miejscowość
 
 
-CREATE FUNCTION (@x VARCHAR(200))
-RETURNS TABLE
-AS
-RETURN
-    SELECT * FROM Nieruchomości N
-	LEFT JOIN Aktualne_oferty A ON
-	N.ID_nieruchomości = A.ID_aktualne
-	WHERE N.Miejscowość = @x;
-  
-  
- 
+
  
 CREATE FUNCTION Aktualne_oferty_z_miasta(@x VARCHAR(200))
 RETURNS TABLE
