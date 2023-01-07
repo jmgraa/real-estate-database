@@ -77,3 +77,15 @@ BEGIN
 		END
 	RETURN
 END
+
+
+
+
+
+CREATE VIEW Ilosc_terminow_pracownikow AS
+SELECT O.Imię, O.Nazwisko, O.Numer_telefonu, COUNT(Id_terminu) AS [Ilość zarezerwowanych terminów] FROM Osoby O
+INNER JOIN Pracownicy P ON
+O.Pesel = P.ID_pracownika
+LEFT JOIN Terminy_oglądania T ON
+O.Pesel = T.ID_pracownika
+GROUP BY O.Imię, O.Nazwisko, O.Numer_telefonu
