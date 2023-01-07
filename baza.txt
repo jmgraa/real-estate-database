@@ -20,13 +20,13 @@ Trzeba skończyć dodawanie danych i można się brać za widoki / funkcje.
 
 Widoki:
 
-1. aktualne oferty z danego miasta
-2. aktualne oferty danego typu nieruchomości
-3. suma wartości nieruchomości z każdego miasta
-4. liczba ofert w miesiącu
-5. wyświetlenie pracowników razem z liczbą terminów, w których ktoś oglądał ich nieruchomość
-6. wyświetlenie opinii każdego pracownika, sortując od najlepszych
-7. wyświetlenie dla każdego pracownika liczby aktualnych, sprzedanych i niesprzedanych nieruchomości
+1. //aktualne oferty z danego miasta
+2.// aktualne oferty danego typu nieruchomości
+3. //suma wartości nieruchomości z każdego miasta
+4.// liczba ofert w miesiącu
+5.// wyświetlenie pracowników razem z liczbą terminów, w których ktoś oglądał ich nieruchomość
+6. //wyświetlenie sredniej opinii kazdego pracownika
+7. wyświetlenie dla każdego pracownika liczby aktualnych, sprzedanych i niesprzedanych nieruchomości//nie wiem jak to zrobic xd
 8.  
 9. ???
 10. ???
@@ -40,7 +40,7 @@ Procedury:
 
 Wyzwalacze:
 - automatyczne przydzielenie pracownika o najmniejszej ilości aktualnych zleceń do zlecenia
-- zmiana ceny w zależności od trendów rynkowych
-- odjęcie od licznika zleceń pracownika jeżeli zlecenie się zakończyło
-- przeniesienie oferty do zakończonych niesprzedanych jeżeli minął termin
-- przeneisienie oferty do aktualnych jeżeli jest przed terminem
+- //zmiana ceny w zależności od trendów rynkowych
+-// Usuniecie z aktualnych jezeli ogloszenie zostalo dodane do rezerwacji
+-// przeniesienie oferty do zakończonych niesprzedanych jeżeli minął termin
+-// przeneisienie oferty do aktualnych jeżeli jest przed terminem
