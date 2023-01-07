@@ -16,11 +16,14 @@ IF OBJECT_ID('Terminy_oglądania','U') IS NOT NULL
 IF OBJECT_ID('Oferty_kupna', 'U') IS NOT NULL
     DROP TABLE Oferty_kupna
 
-IF OBJECT_ID('Aktualne_oferty', 'U') IS NOT NULL
-    DROP TABLE Aktualne_oferty
+IF OBJECT_ID('Aktualne', 'U') IS NOT NULL
+    DROP TABLE Aktualne
 
 IF OBJECT_ID('Niesprzedane', 'U') IS NOT NULL
     DROP TABLE Niesprzedane
+
+IF OBJECT_ID('Opinie','U') IS NOT NULL
+	DROP TABLE Opinie
 
 IF OBJECT_ID('Sprzedane', 'U') IS NOT NULL
     DROP TABLE Sprzedane
@@ -33,9 +36,6 @@ IF OBJECT_ID('Trendy_rynkowe','U') IS NOT NULL
 
 IF OBJECT_ID('Rezerwacje','U') IS NOT NULL
 	DROP TABLE Rezerwacje
-
-IF OBJECT_ID('Opinie','U') IS NOT NULL
-	DROP TABLE Opinie
 
 IF OBJECT_ID('Klienci','U') IS NOT NULL
 	DROP TABLE Klienci
@@ -52,9 +52,9 @@ IF OBJECT_ID('Nieruchomości','U') IS NOT NULL
 CREATE TABLE Nieruchomości (
 	ID_nieruchomości INT IDENTITY(1,1) PRIMARY KEY,
 
-	Ulica VARCHAR(200) NULL,
+	Ulica VARCHAR(MAX) NULL,
 	Numer INT NOT NULL,
-	Miejscowość VARCHAR(200) NOT NULL,
+	Miejscowość VARCHAR(MAX) NOT NULL,
 
 	Powierzchnia INT NOT NULL,
 	Cena INT NOT NULL,
@@ -67,16 +67,16 @@ CREATE TABLE Nieruchomości (
 CREATE TABLE Domy (
     ID_domu INT REFERENCES Nieruchomości PRIMARY KEY,
 
-    Rodzaj_zabudowy VARCHAR(200),
+    Rodzaj_zabudowy VARCHAR(MAX),
     Liczba_pokoi INT NOT NULL,
     Liczba_pięter INT NOT NULL,
-    Rodzaj_ogrzewania VARCHAR(200),
+    Rodzaj_ogrzewania VARCHAR(MAX),
 )
 
 CREATE TABLE Mieszkania (
     ID_mieszkania INT REFERENCES Nieruchomości PRIMARY KEY,
 
-    Rodzaj_zabudowy VARCHAR(200),
+    Rodzaj_zabudowy VARCHAR(MAX),
     Piętro INT,
     Ogrzewanie_z_sieci BIT,
     Winda_w_budynku BIT
@@ -85,7 +85,7 @@ CREATE TABLE Mieszkania (
 CREATE TABLE Działki (
     ID_działki INT REFERENCES Nieruchomości PRIMARY KEY,
 
-    Rodzaj_dzialki VARCHAR(200),
+    Rodzaj_dzialki VARCHAR(MAX),
     Dostep_do_pradu BIT NOT NULL,
     Dostep_do_gazu BIT NOT NULL,
     Dostep_do_wody BIT NOT NULL,
@@ -95,27 +95,27 @@ CREATE TABLE Działki (
 CREATE TABLE Osoby (
     Pesel VARCHAR(11) PRIMARY KEY,
 
-    Imię VARCHAR(200) NOT NULL,
-    Nazwisko VARCHAR(200) NOT NULL,
+    Imię VARCHAR(MAX) NOT NULL,
+    Nazwisko VARCHAR(MAX) NOT NULL,
     Numer_telefonu VARCHAR(12) NOT NULL
 )
 
 CREATE TABLE Klienci (
 	ID_klienta VARCHAR(11) REFERENCES Osoby PRIMARY KEY,
 
-    Adres_email VARCHAR(200) NULL
+    Adres_email VARCHAR(MAX) NULL
 )
 
 CREATE TABLE Pracownicy (
 	ID_pracownika VARCHAR(11) REFERENCES Osoby PRIMARY KEY,
 
     Liczba_aktualnych_zleceń INT DEFAULT 0,
-    Stanowisko VARCHAR(200) NOT NULL,
+    Stanowisko VARCHAR(MAX) NOT NULL,
 )
 
 CREATE TABLE Cechy_nieruchomości (
     ID_nieruchomości INT,
-    Nazwa_cechy VARCHAR(200) NOT NULL,
+    Nazwa_cechy VARCHAR(MAX) NOT NULL,
 
     Constraint ID_cechy PRIMARY KEY (ID_nieruchomości, Nazwa_cechy),
 
@@ -139,7 +139,7 @@ CREATE TABLE Wszystkie_oferty (
     ID_oferty INT IDENTITY(1,1) PRIMARY KEY,
 
     ID_nieruchomości INT,
-    Pracownik_obsługujący VARCHAR(11) NOT NULL,
+    Pracownik_obsługujący VARCHAR(11) NULL,
     Data_wystawienia DATETIME NOT NULL,
     Data_zakończenia DATETIME NOT NULL,
 
@@ -149,7 +149,7 @@ CREATE TABLE Wszystkie_oferty (
     CHECK (Data_wystawienia < Data_zakończenia)
 )
 
-CREATE TABLE Aktualne_oferty (
+CREATE TABLE Aktualne (
     ID_aktualne INT REFERENCES Wszystkie_oferty PRIMARY KEY
 )
 
@@ -170,10 +170,10 @@ CREATE TABLE Sprzedane (
 CREATE TABLE Trendy_rynkowe (
     ID_trendu INT IDENTITY(1,1) PRIMARY KEY,
 
-    Nazwa_trendu VARCHAR(200) NOT NULL,
+    Nazwa_trendu VARCHAR(MAX) NOT NULL,
     Rozpoczęcie DATETIME NOT NULL,
     Zakończenie DATETIME NULL,
-    Miejscowość VARCHAR(200) NOT NULL UNIQUE,
+    Miejscowość VARCHAR(MAX) NOT NULL UNIQUE,
     Zmiana_mnożnika FLOAT NOT NULL,
 
     CHECK (Rozpoczęcie < Zakończenie)
@@ -181,12 +181,12 @@ CREATE TABLE Trendy_rynkowe (
 
 CREATE TABLE Rezerwacje (
     ID_rezerwacji INT IDENTITY(1,1) PRIMARY KEY,
-    ID_nieruchomości INT,
+    ID_oferty INT,
     ID_klienta VARCHAR(11),
     Początek DATETIME NOT NULL,
     Koniec DATETIME NOT NULL,
 
-    FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości),
+    FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne),
     FOREIGN KEY (ID_klienta) REFERENCES Klienci(ID_klienta),
 
     CHECK (Początek < Koniec)
