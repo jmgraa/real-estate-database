@@ -27,9 +27,9 @@ Widoki:
 5.// wyświetlenie pracowników razem z liczbą terminów, w których ktoś oglądał ich nieruchomość
 6. //wyświetlenie sredniej opinii kazdego pracownika
 7. wyświetlenie dla każdego pracownika liczby aktualnych, sprzedanych i niesprzedanych nieruchomości//nie wiem jak to zrobic xd
-8.  wyswietlanie ile danych pracownik dokonal obrotu
-9. ???
-10. ???
+8.//  wyswietlanie ile danych pracownik dokonal obrotu
+9. wypisanie wszystkich dostepnych informacji na temat mieszkania o ID
+10. wypisanie wszystkich ofert znajdujacych sie w przedziale kwoty
 
 Procedury:
 - dodanie ogłoszenia
