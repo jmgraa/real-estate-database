@@ -8,14 +8,18 @@ CREATE VIEW Ranking_pracowników AS
 	Os.Pesel = P.ID_pracownika
 	GROUP BY P.ID_pracownika,Os.Imię, Os.Nazwisko
 	ORDER BY Średnia_ocena DESC
+GO
 
 CREATE VIEW Liczba_ofert_w_miesiacu AS
 	SELECT MONTH(Data_wystawienia) AS [Numer Miesiaca], COUNT(MONTH(Data_wystawienia)) AS [Liczba ofert w miesiacu] FROM Wszystkie_oferty
 	GROUP BY MONTH(Data_wystawienia)
+GO
+
 
 CREATE VIEW Suma_wartosci AS
 	SELECT Miejscowość, SUM(Cena) AS [Suma nieruchomosci] FROM Nieruchomości
 	GROUP BY Miejscowość
+GO
  
 CREATE FUNCTION Aktualne_z_miasta(@x VARCHAR(MAX))
 RETURNS TABLE
@@ -66,3 +70,18 @@ CREATE VIEW Ilosc_terminow_pracownikow AS
 	LEFT JOIN Terminy_oglądania T ON
 	O.Pesel = T.ID_pracownika
 	GROUP BY O.Imię, O.Nazwisko, O.Numer_telefonu
+GO
+	
+	
+CREATE VIEW Obrót_pracowników AS
+	SELECT Osoby.Imię, Osoby.Nazwisko, SUM(Nieruchomości.Cena) AS [Suma sprzedanych nieruchomości] FROM Pracownicy 
+	LEFT JOIN Osoby ON
+	Pracownicy.ID_pracownika = Osoby.Pesel
+	LEFT JOIN Wszystkie_oferty ON
+	Pracownicy.ID_pracownika = Wszystkie_oferty.Pracownik_obsługujący
+	LEFT JOIN Nieruchomości ON
+		Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości
+	LEFT JOIN Sprzedane ON
+	Sprzedane.ID_sprzedane = Wszystkie_oferty.ID_nieruchomości
+	GROUP BY Osoby.Imię, Osoby.Nazwisko
+GO
