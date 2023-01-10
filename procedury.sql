@@ -67,6 +67,8 @@ AS
 	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
 
     DELETE FROM Rezerwacje WHERE Koniec <= GETDATE()
+
+    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek >= GETDATE() AND Koniec < GETDATE())
 GO
 
 CREATE PROCEDURE ZakupNieruchomości @OfferID INT, @ClientID INT
@@ -92,7 +94,6 @@ AS
                     @pracownik = SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID
                     IF @pracownik IN (SELECT Pracownik_obsługujący FROM Rezerwacje INNER JOIN Wszystkie_oferty ON Rezerwacje.ID_oferty = Wszystkie_oferty.ID_oferty WHERE (@Begin < Początek AND @End < Początek) OR (@Begin > Początek AND @End > Koniec) BEGIN
                         INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Begin, @End)
-                        DELETE FROM Aktualne WHERE ID_aktualne = @OfferID
                     END
                     ELSE BEGIN
                         PRINT('BŁĄD - pracownik obsługujący ogłosznie jest w danym terminie zajęty!')
