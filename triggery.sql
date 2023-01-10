@@ -1,93 +1,114 @@
-IF OBJECT_ID('Dodanie_trendu', 'TR') IS NOT NULL
-    DROP TRIGGER Dodanie_trendu
+IF OBJECT_ID('DodanieTrendu', 'TR') IS NOT NULL
+    DROP TRIGGER DodanieTrendu
+GO
+IF OBJECT_ID('KoniecTrendu', 'TR') IS NOT NULL
+    DROP TRIGGER KoniecTrendu
+GO
+IF OBJECT_ID('PrzydzieleniePracownika', 'TR') IS NOT NULL
+    DROP TRIGGER PrzydzieleniePracownika
+GO
+IF OBJECT_ID('ZwolnieniePracownikaSprzedane', 'TR') IS NOT NULL
+    DROP TRIGGER ZwolnieniePracownikaSprzedane
+GO
+IF OBJECT_ID('ZwolnieniePracownikaNiesprzedane', 'TR') IS NOT NULL
+    DROP TRIGGER ZwolnieniePracownikaNiesprzedane
+GO
+IF OBJECT_ID('KoniecRezerwacji', 'TR') IS NOT NULL
+    DROP TRIGGER KoniecRezerwacji
 GO
 
-IF OBJECT_ID('Przydzielenie_pracownika', 'TR') IS NOT NULL
-    DROP TRIGGER Przydzielenie_pracownika
-GO
-
-IF OBJECT_ID('Zwolnienie_pracownika_sprzedane', 'TR') IS NOT NULL
-    DROP TRIGGER Zwolnienie_pracownika_sprzedane
-GO
-
-IF OBJECT_ID('Zwolnienie_pracownika_niesprzedane', 'TR') IS NOT NULL
-    DROP TRIGGER Zwolnienie_pracownika_niesprzedane
-GO
-
-IF OBJECT_ID('Zarezerwowanie', 'TR') IS NOT NULL
-    DROP TRIGGER Zarezerwowanie
-GO
-
-CREATE TRIGGER Dodanie_trendu
+CREATE TRIGGER DodanieTrendu
 ON Trendy_rynkowe
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @mnoznik FLOAT = (SELECT Zmiana_Mnożnika FROM INSERTED)
-    DECLARE @miasto VARCHAR(MAX) = (SELECT Miejscowość FROM INSERTED)
+    DECLARE @multiplier FLOAT = (SELECT Zmiana_Mnożnika FROM INSERTED)
+    DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM INSERTED)
 
     IF ((SELECT Nazwa_trendu FROM INSERTED) = 'wzrost')
     BEGIN
-        UPDATE Nieruchomości
-        
-        SET Nieruchomości.Cena = Nieruchomości.Cena + Nieruchomości.Cena * @mnoznik
-        WHERE Nieruchomości.Miejscowość = @miasto AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+        UPDATE Nieruchomości        
+            SET Nieruchomości.Cena = Nieruchomości.Cena * (1 + @multiplier) 
+            WHERE Nieruchomości.Miejscowość = @place AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
     END
 
     ELSE IF ((SELECT Nazwa_trendu FROM INSERTED) = 'spadek')
     BEGIN
         UPDATE Nieruchomości
-        SET Nieruchomości.Cena = Nieruchomości.Cena - Nieruchomości.Cena * @mnoznik
-        WHERE Nieruchomości.Miejscowość = @miasto AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+            SET Nieruchomości.Cena = Nieruchomości.Cena * (1 - @multiplier) 
+            WHERE Nieruchomości.Miejscowość = @place AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
     END
 END
 GO
 
+CREATE TRIGGER KoniecTrendu
+ON Trendy_rynkowe
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @multiplier FLOAT = (SELECT Zmiana_Mnożnika FROM DELETED)
+    DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM DELETED)
 
-CREATE TRIGGER Przydzielenie_pracownika
+    IF ((SELECT Nazwa_trendu FROM DELETED) = 'wzrost')
+    BEGIN
+        UPDATE Nieruchomości        
+            SET Nieruchomości.Cena = Nieruchomości.Cena * 100 / (1 + @multiplier) 
+            WHERE Nieruchomości.Miejscowość = @place AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+    END
+
+    ELSE IF ((SELECT Nazwa_trendu FROM DELETED) = 'spadek')
+    BEGIN
+        UPDATE Nieruchomości
+            SET Nieruchomości.Cena = Nieruchomości.Cena * 100 / (1 - @multiplier)
+            WHERE Nieruchomości.Miejscowość = @place AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+    END
+END
+GO
+
+CREATE TRIGGER PrzydzieleniePracownika
 ON Wszystkie_oferty
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @pracownik INT = (SELECT TOP 1 ID_pracownika FROM Pracownicy ORDER BY Liczba_aktualnych_zleceń ASC)
+    DECLARE @employee INT = (SELECT TOP 1 ID_pracownika FROM Pracownicy ORDER BY Liczba_aktualnych_zleceń ASC)
 
     UPDATE Pracownicy
         SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń + 1
-        WHERE ID_pracownika = @pracownik
+        WHERE ID_pracownika = @employee
 
     UPDATE Wszystkie_oferty
-        SET Pracownik_obsługujący = @pracownik
+        SET Pracownik_obsługujący = @employee
         WHERE ID_oferty = (SELECT TOP 1 ID_oferty FROM Wszystkie_oferty ORDER BY ID_oferty DESC)
 END
 GO
 
-CREATE TRIGGER Zwolnienie_pracownika_sprzedane
+CREATE TRIGGER ZwolnieniePracownikaSprzedane
 ON Sprzedane
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @pracownik INT = (SELECT Pracownik_obsługujący FROM INSERTED INNER JOIN Wszystkie_oferty ON INSERTED.ID_sprzedane = Wszystkie_oferty.ID_oferty)
+    DECLARE @employee INT = (SELECT Pracownik_obsługujący FROM INSERTED INNER JOIN Wszystkie_oferty ON INSERTED.ID_sprzedane = Wszystkie_oferty.ID_oferty)
 
     UPDATE Pracownicy
         SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń - 1
-        WHERE ID_pracownika = @pracownik
+        WHERE ID_pracownika = @employee
 END
 GO
 
-CREATE TRIGGER Zwolnienie_pracownika_niesprzedane
+CREATE TRIGGER ZwolnieniePracownikaNiesprzedane
 ON Niesprzedane
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @pracownik INT = (SELECT Pracownik_obsługujący FROM INSERTED INNER JOIN Wszystkie_oferty ON INSERTED.ID_niesprzedane = Wszystkie_oferty.ID_oferty)
+    DECLARE @employee INT = (SELECT Pracownik_obsługujący FROM INSERTED INNER JOIN Wszystkie_oferty ON INSERTED.ID_niesprzedane = Wszystkie_oferty.ID_oferty)
 
     UPDATE Pracownicy
         SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń - 1
-        WHERE ID_pracownika = @pracownik
+        WHERE ID_pracownika = @employee
 END
 GO
 
-CREATE TRIGGER Koniec_rezerwacji
+CREATE TRIGGER KoniecRezerwacji
 ON Rezerwacje
 AFTER DELETE
 AS

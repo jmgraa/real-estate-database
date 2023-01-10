@@ -67,7 +67,7 @@ CREATE TABLE Nieruchomości (
 CREATE TABLE Domy (
     ID_domu INT REFERENCES Nieruchomości PRIMARY KEY,
 
-    Rodzaj_zabudowy VARCHAR(MAX),
+    Rodzaj_zabudowy VARCHAR(MAX) NULL,
     Liczba_pokoi INT NOT NULL,
     Liczba_pięter INT NOT NULL,
     Rodzaj_ogrzewania VARCHAR(MAX),
@@ -115,7 +115,7 @@ CREATE TABLE Pracownicy (
 
 CREATE TABLE Cechy_nieruchomości (
     ID_nieruchomości INT,
-    Nazwa_cechy VARCHAR(MAX) NOT NULL,
+    Nazwa_cechy VARCHAR(450) NOT NULL,
 
     CONSTRAINT ID_cechy PRIMARY KEY (ID_nieruchomości, Nazwa_cechy),
 
@@ -173,7 +173,7 @@ CREATE TABLE Trendy_rynkowe (
     Nazwa_trendu VARCHAR(MAX) NOT NULL,
     Rozpoczęcie DATETIME NOT NULL,
     Zakończenie DATETIME NULL,
-    Miejscowość VARCHAR(MAX) NOT NULL UNIQUE,
+    Miejscowość VARCHAR(450) NOT NULL UNIQUE,
     Zmiana_mnożnika FLOAT NOT NULL,
 
     CHECK (Rozpoczęcie < Zakończenie)
