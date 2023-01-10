@@ -15,10 +15,8 @@ Baza pozwala zarządzać swoimi ofertami: dodawać nowe, grupować je według st
 ???
 
 # Diagram ER
-Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabelami w bazie.
-
-# Schemat Bazy Danych
-W schemacie bazy danych znajdują się wszystkie tabele, ich skład tj. nazwy oraz typy tych danych oraz czy dana wartość dopuszcza istnienie NULLa.
+Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabelami w bazie oraz skład wszystkich tabel tj. nazwy i typy tych danych.
+![DiagramER](diagram.png)
 
 # Tabele
 - Nieruchomości
