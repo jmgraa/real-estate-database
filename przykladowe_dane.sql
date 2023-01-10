@@ -271,3 +271,37 @@ INSERT INTO Opinie(ID_oferty, Data_wystawienia_opinii, Ocena, Opis) VALUES
 (44, '2022-12-12 17:22:00', 2, 'Pracownik był nieodpowiedzialny i często spóźniał się na spotkania z klientami.'),
 (46, '2022-05-10 19:37:00', 4, 'Pracownik nie był zbyt pomocny i brakowało mu chęci do pracy.'),
 (14, '2022-03-25 14:43:00', 10, 'Nieruchomość była nowoczesna i wyposażona we wszystkie niezbędne udogodnienia.')
+
+INSERT INTO Cechy_nieruchomości VALUES
+(5, 'garaż'),
+(15, 'basen'),
+(16, 'taras'),
+(16, 'altana'),
+(19,'garaż'),
+(19,'basen'),
+(25,'garaż'),
+(36, 'elektrownia słoneczna'),
+(48, 'własne ujęcie wody'),
+
+(3, 'miejsce parkingowe'),
+(3, 'ochrona'),
+(18, 'komórka lokatorska'),
+(18, 'taras'),
+(18, 'balkon'),
+(28, 'piwnica'),
+(38, 'klimatyzacja'),
+(38, 'monitoring'),
+(47, 'balkon'),
+
+(4, 'studnia'),
+(8, 'schowek na narzędzia'),
+(13, 'ogrodzenie'),
+(13, 'narzędzia'),
+(34, 'krzewy wokół działki'),
+(29, 'wjazd na działkę'),
+(44, 'infrastruktura drogowa'),
+(43, 'studnia'),
+(43, 'ogrodzenie'),
+(43, 'wjazd na działkę'),
+(49, 'schowek na narzędzia')
+(49, 'infrastruktura drogowa')

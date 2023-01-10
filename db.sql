@@ -10,6 +10,9 @@ IF OBJECT_ID('Działki','U') IS NOT NULL
 IF OBJECT_ID('Cechy_nieruchomości','U') IS NOT NULL
 	DROP TABLE Cechy_nieruchomości
 
+IF OBJECT_ID('Rezerwacje','U') IS NOT NULL
+	DROP TABLE Rezerwacje
+
 IF OBJECT_ID('Terminy_oglądania','U') IS NOT NULL
 	DROP TABLE Terminy_oglądania
 
@@ -33,9 +36,6 @@ IF OBJECT_ID('Wszystkie_oferty', 'U') IS NOT NULL
 
 IF OBJECT_ID('Trendy_rynkowe','U') IS NOT NULL
 	DROP TABLE Trendy_rynkowe
-
-IF OBJECT_ID('Rezerwacje','U') IS NOT NULL
-	DROP TABLE Rezerwacje
 
 IF OBJECT_ID('Klienci','U') IS NOT NULL
 	DROP TABLE Klienci
@@ -117,7 +117,7 @@ CREATE TABLE Cechy_nieruchomości (
     ID_nieruchomości INT,
     Nazwa_cechy VARCHAR(MAX) NOT NULL,
 
-    Constraint ID_cechy PRIMARY KEY (ID_nieruchomości, Nazwa_cechy),
+    CONSTRAINT ID_cechy PRIMARY KEY (ID_nieruchomości, Nazwa_cechy),
 
     FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości)
 )
