@@ -16,7 +16,7 @@ Spis tabel:
 15. Rezerwacje
 16. Opinie UZUPEŁNIONE
 
-Trzeba skończyć dodawanie danych i można się brać za widoki / funkcje.
+Rzeczy, które mogą być NULLami: Ulica(Nieruchomości), 
 
 Widoki:
 
