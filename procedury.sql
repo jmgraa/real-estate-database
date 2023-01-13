@@ -23,19 +23,19 @@ IF OBJECT_ID('DodajOpinię', 'P') IS NOT NULL
     DROP PROCEDURE DodajOpinię
 GO
 
-CREATE PROCEDURE DodajDom @ID INT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @Heating VARCHAR(MAX)
+CREATE PROCEDURE DodajDom (@ID INT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @Heating VARCHAR(MAX))
 AS
     INSERT INTO Domy
     VALUES (@ID, @Type, @Rooms, @Floors, @Heating)
 GO
 
-CREATE PROCEDURE DodajMieszkanie @ID INT, @Type VARCHAR(MAX), @Floor INT, @Heating BIT, @Lift BIT
+CREATE PROCEDURE (DodajMieszkanie @ID INT, @Type VARCHAR(MAX), @Floor INT, @Heating BIT, @Lift BIT)
 AS
     INSERT INTO Mieszkania
     VALUES (@ID, @Type, @Floor, @Heating, @Lift)
 GO
 
-CREATE PROCEDURE DodajDziałkę @ID INT, @Type VARCHAR(MAX), @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT
+CREATE PROCEDURE (DodajDziałkę @ID INT, @Type VARCHAR(MAX), @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT)
 AS
     INSERT INTO Działki
     VALUES (@ID, @Type, @Electricty, @Gas, @Water, @Sewers)
@@ -48,15 +48,15 @@ AS
     DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
 
     IF @Type_of_estate = 'dom' BEGIN
-        EXEC DodajDom @ID, @Type, @Rooms, @Floors, @HeatingType
+        EXEC DodajDom (@ID, @Type, @Rooms, @Floors, @HeatingType)
         PRINT('Dodano ogłoszenie domu!')
     END
     ELSE IF @Type_of_estate = 'mieszkanie' BEGIN
-        EXEC DodajMieszkanie @ID, @Type, @Floor, @HeatingBit, @Lift
+        EXEC DodajMieszkanie (@ID, @Type, @Floor, @HeatingBit, @Lift)
         PRINT('Dodano ogłoszenie mieszkania!')
     END
     ELSE IF @Type_of_estate = 'działka' BEGIN
-        EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
+        EXEC DodajDziałkę (@ID, @Type, @Electricty, @Gas, @Water, @Sewers)
         PRINT('Dodano ogłoszenie działki!')
     END
     ELSE BEGIN
@@ -76,13 +76,14 @@ AS
     PRINT('SUKCES - synchronizacja przebiegła pomyślnie!')
 GO
 
-CREATE PROCEDURE ZakupNieruchomości @OfferID INT, @ClientID INT
+CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @ClientID INT)
 AS
-    IF @OfferID IN (SELECT ID_aktualne FROM Wszystkie_oferty) BEGIN
-        @place = SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID
-        @mnoznik = SELECT Sum(Zmiana_mnożnika) FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE()
+    IF @OfferID IN (SELECT ID_nieruchomości FROM Wszystkie_oferty) BEGIN
+        DECLARE @place INT = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
+        DECLARE @mutlplier INT = (SELECT Sum(Zmiana_mnożnika) FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
+        DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_nieruchomości = @OfferID)
 
-        INSERT INTO Sprzedane VALUES (@EstateID, @ClientID, GETDATE(), @mnoznik)
+        INSERT INTO Sprzedane VALUES (@EstateID, @ClientID, GETDATE(), @mutlplier)
         DELETE FROM Aktualne WHERE ID_aktualne = @OfferID
 
         PRINT('SUKCES - udało Ci się zakupić tą nieruchmość!')
@@ -92,15 +93,17 @@ AS
     END
 GO
 
-CREATE PROCEDURE Rezerwacja @OfferID INT, @CustomerID INT, @Begin DATETIME, @End DATETIME
+CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID INT, @Start DATETIME, @End DATETIME)
 AS
-    IF @OfferID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
+    IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
+        DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
+
         IF @OfferID NOT IN (SELECT ID_rezerwacji FROM Rezerwacje) BEGIN
             IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-                IF @Begin < @End BEGIN                    
-                    @pracownik = SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID
-                    IF @pracownik IN (SELECT Pracownik_obsługujący FROM Rezerwacje INNER JOIN Wszystkie_oferty ON Rezerwacje.ID_oferty = Wszystkie_oferty.ID_oferty WHERE (@Begin < Początek AND @End < Początek) OR (@Begin > Początek AND @End > Koniec) BEGIN
-                        INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Begin, @End)
+                IF @Start < @End BEGIN                    
+                    DECLARE @employee INT = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
+                    IF @employee IN (SELECT Pracownik_obsługujący FROM Rezerwacje INNER JOIN Wszystkie_oferty ON Rezerwacje.ID_oferty = Wszystkie_oferty.ID_oferty WHERE (@Start < Początek AND @End < Początek) OR (@Start > Początek AND @End > Koniec)) BEGIN
+                        INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
                         PRINT('SUKCES - pomyślnie dodano rezerwację!')
                     END
                     ELSE BEGIN
@@ -120,11 +123,11 @@ AS
         END
     END
     ELSE BEGIN
-        PRINT('BŁĄD - nie istnieje nieruchomość o takim ID!')
+        PRINT('BŁĄD - nie istnieje ogłoszenie o takim ID!')
     END
 GO
 
-CREATE PROCEDURE DodajOpinię @CustomerID INT, @OfferID INT, @Grade INT, @Description VARCHAR(MAX)
+CREATE PROCEDURE DodajOpinię (@CustomerID INT, @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
 AS
     IF @OfferID IN (SELECT ID_sprzedane FROM Sprzedane WHERE ID_kupującego = @CustomerID) BEGIN
         IF (@OfferID NOT IN (SELECT ID_oferty FROM Opinie)) BEGIN

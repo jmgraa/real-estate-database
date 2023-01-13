@@ -71,15 +71,18 @@ CREATE TABLE Domy (
     Liczba_pokoi INT NOT NULL,
     Liczba_pięter INT NOT NULL,
     Rodzaj_ogrzewania VARCHAR(MAX),
+
+    CHECK (Liczba_pokoi > 0),
+    CHECK (Liczba_pięter >= 0)
 )
 
 CREATE TABLE Mieszkania (
     ID_mieszkania INT REFERENCES Nieruchomości PRIMARY KEY,
 
     Rodzaj_zabudowy VARCHAR(MAX),
-    Piętro INT,
-    Ogrzewanie_z_sieci BIT,
-    Winda_w_budynku BIT
+    Piętro INT NOT NULL,
+    Ogrzewanie_z_sieci BIT NOT NULL,
+    Winda_w_budynku BIT NOT NULL
 )
 
 CREATE TABLE Działki (
@@ -125,10 +128,10 @@ CREATE TABLE Cechy_nieruchomości (
 CREATE TABLE Terminy_oglądania (
     ID_terminu INT PRIMARY KEY,
 
-    ID_oglądającego VARCHAR(11),
-    ID_pracownika VARCHAR(11),
+    ID_oglądającego VARCHAR(11) NOT NULL,
+    ID_pracownika VARCHAR(11) NOT NULL,
     Data_zwiedzania DATETIME NOT NULL,
-    Miejsce_zwiedzania INT,
+    Miejsce_zwiedzania INT NOT NULL,
 
     FOREIGN KEY (ID_oglądającego) REFERENCES Klienci(ID_klienta),    
     FOREIGN KEY (Miejsce_zwiedzania) REFERENCES Nieruchomości(ID_nieruchomości),
@@ -138,8 +141,8 @@ CREATE TABLE Terminy_oglądania (
 CREATE TABLE Wszystkie_oferty (
     ID_oferty INT IDENTITY(1,1) PRIMARY KEY,
 
-    ID_nieruchomości INT,
-    Pracownik_obsługujący VARCHAR(11) NULL,
+    ID_nieruchomości INT NOT NULL,
+    Pracownik_obsługujący VARCHAR(11) DEFAULT NULL,
     Data_wystawienia DATETIME NOT NULL,
     Data_zakończenia DATETIME NOT NULL,
 
@@ -181,7 +184,7 @@ CREATE TABLE Trendy_rynkowe (
 
 CREATE TABLE Rezerwacje (
     ID_rezerwacji INT IDENTITY(1,1) PRIMARY KEY,
-    ID_oferty INT,
+    ID_oferty INT NOT NULL,
     ID_klienta VARCHAR(11),
     Początek DATETIME NOT NULL,
     Koniec DATETIME NOT NULL,
@@ -195,10 +198,10 @@ CREATE TABLE Rezerwacje (
 CREATE TABLE Opinie (
     ID_opinii INT IDENTITY(1,1) PRIMARY KEY,
 
-    ID_oferty INT,
+    ID_oferty INT NOT NULL,
     Data_wystawienia_opinii DATETIME NOT NULL,
-    Ocena INT,
-    Opis VARCHAR(MAX),
+    Ocena INT NOT NULL,
+    Opis VARCHAR(MAX) NULL,
 
     FOREIGN KEY (ID_oferty) REFERENCES Sprzedane(ID_sprzedane),
 

@@ -48,7 +48,8 @@ INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Moż
 ('Bolesława Leszczyńskiego', 94, 'Mszczonów', 463, 133304, 0),
 ('Robotnicza', 67, 'Warszawa', 392, 684869, 1),
 ('Ignacego Paderewskiego', 317, 'Legnica', 364, 781377, 0),
-('Mirona Białoszewskiego', 359, 'Świebodzin', 307, 746154, 1)
+('Mirona Białoszewskiego', 359, 'Świebodzin', 307, 746154, 1),
+('Henryka Hubala-Dobrzańskiego', 19, 'Tarnów', 900, 7000000, 0)
 
 INSERT INTO Domy VALUES
 (5, 'wolnostojący', 6, 1, 'gaz'),
@@ -70,7 +71,8 @@ INSERT INTO Domy VALUES
 (39, 'szeregowiec', 4, 1, 'prąd'),
 (41, 'letniskowy', 7, 1, 'gaz'),
 (45, 'wolnostojący', 10, 11, 'gaz'),
-(48, 'bliźniak', 6, 1, 'sieć miejska')
+(48, 'bliźniak', 6, 1, 'sieć miejska'),
+(51, 'wolnostojący', 5, 100, 'gaz')
 
 INSERT INTO Mieszkania VALUES
 (1, 'blok', 4, 1, 1),
@@ -303,5 +305,5 @@ INSERT INTO Cechy_nieruchomości VALUES
 (43, 'studnia'),
 (43, 'ogrodzenie'),
 (43, 'wjazd na działkę'),
-(49, 'schowek na narzędzia')
+(49, 'schowek na narzędzia'),
 (49, 'infrastruktura drogowa')
