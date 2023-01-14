@@ -73,20 +73,20 @@ INSERT INTO Domy VALUES
 (48, 'bliźniak', 6, 1, 'sieć miejska')
 
 INSERT INTO Mieszkania VALUES
-(1, 'blok', 4, 1, 1),
-(3, 'apartamentowiec', 3, 0, 1),
-(10, 'apartamentowiec', 10, 0, 0),
-(14, 'apartamentowiec', 8, 1, 1),
-(18, 'apartamentowiec', 6, 1, 0),
-(20, 'kamienica', 1, 0, 0),
-(26, 'kamienica', 9, 1, 1),
-(28, 'blok', 7, 0, 0),
-(30, 'apartamentowiec', 8, 0, 1),
-(31, 'blok', 1, 0, 0),
-(38, 'blok', 9, 1, 0),
-(42, 'apartamentowiec', 7, 0, 0),
-(47, 'blok', 8, 0, 1),
-(50, 'blok', 6, 0, 1)
+(1, 54, 'blok', 4, 1, 1),
+(3, 12, 'apartamentowiec', 3, 0, 1),
+(10, 23, 'apartamentowiec', 10, 0, 0),
+(14, 21, 'apartamentowiec', 8, 1, 1),
+(18, 45, 'apartamentowiec', 6, 1, 0),
+(20, 6, 'kamienica', 1, 0, 0),
+(26, 8, 'kamienica', 9, 1, 1),
+(28, 45, 'blok', 7, 0, 0),
+(30, 12, 'apartamentowiec', 8, 0, 1),
+(31, 65, 'blok', 1, 0, 0),
+(38, 1, 'blok', 9, 1, 0),
+(42, 7, 'apartamentowiec', 7, 0, 0),
+(47, 44, 'blok', 8, 0, 1),
+(50, 2, 'blok', 6, 0, 1)
 
 INSERT INTO Działki VALUES
 (2, 'inwestycjyjna', 0, 0, 0, 0),
