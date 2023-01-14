@@ -73,6 +73,8 @@ AS
 
     DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek >= GETDATE() AND Koniec < GETDATE())
 
+    DELETE FROM Trendy_rynkowe WHERE Koniec IS NOT NULL AND Koniec <= GETDATE()
+
     PRINT('SUKCES - synchronizacja przebiegła pomyślnie!')
 GO
 

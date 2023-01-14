@@ -67,7 +67,7 @@ CREATE TABLE Nieruchomości (
 CREATE TABLE Domy (
     ID_domu INT REFERENCES Nieruchomości PRIMARY KEY,
 
-    Rodzaj_zabudowy VARCHAR(MAX) NULL,
+    Rodzaj_zabudowy VARCHAR(MAX) NOT NULL,
     Liczba_pokoi INT NOT NULL,
     Liczba_pięter INT NOT NULL,
     Rodzaj_ogrzewania VARCHAR(MAX),
