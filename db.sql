@@ -79,10 +79,13 @@ CREATE TABLE Domy (
 CREATE TABLE Mieszkania (
     ID_mieszkania INT REFERENCES Nieruchomości PRIMARY KEY,
 
+    Numer_mieszkania INT NOT NULL,
     Rodzaj_zabudowy VARCHAR(MAX) NOT NULL,
     Piętro INT NOT NULL,
     Ogrzewanie_z_sieci BIT NOT NULL,
-    Winda_w_budynku BIT NOT NULL
+    Winda_w_budynku BIT NOT NULL,
+
+    CHECK(Numer_mieszkania >= 0)
 )
 
 CREATE TABLE Działki (
@@ -141,7 +144,7 @@ CREATE TABLE Terminy_oglądania (
 CREATE TABLE Wszystkie_oferty (
     ID_oferty INT IDENTITY(1,1) PRIMARY KEY,
 
-    ID_nieruchomości INT NOT NULL,
+    ID_nieruchomości INT NOT NULL UNIQUE,
     Pracownik_obsługujący VARCHAR(11) DEFAULT NULL,
     Data_wystawienia DATETIME NOT NULL,
     Data_zakończenia DATETIME NOT NULL,
@@ -179,7 +182,8 @@ CREATE TABLE Trendy_rynkowe (
     Miejscowość VARCHAR(450) NOT NULL UNIQUE,
     Zmiana_mnożnika FLOAT NOT NULL,
 
-    CHECK (Rozpoczęcie < Zakończenie)
+    CHECK (Rozpoczęcie < Zakończenie),
+    CHECK (Zmiana_Mnożnika > 0 AND Zmiana_Mnożnika <= 1)
 )
 
 CREATE TABLE Rezerwacje (
