@@ -79,7 +79,7 @@ CREATE TABLE Domy (
 CREATE TABLE Mieszkania (
     ID_mieszkania INT REFERENCES Nieruchomości PRIMARY KEY,
 
-    Rodzaj_zabudowy VARCHAR(MAX),
+    Rodzaj_zabudowy VARCHAR(MAX) NOT NULL,
     Piętro INT NOT NULL,
     Ogrzewanie_z_sieci BIT NOT NULL,
     Winda_w_budynku BIT NOT NULL
@@ -88,7 +88,7 @@ CREATE TABLE Mieszkania (
 CREATE TABLE Działki (
     ID_działki INT REFERENCES Nieruchomości PRIMARY KEY,
 
-    Rodzaj_dzialki VARCHAR(MAX),
+    Rodzaj_dzialki VARCHAR(MAX) NOT NULL,
     Dostep_do_pradu BIT NOT NULL,
     Dostep_do_gazu BIT NOT NULL,
     Dostep_do_wody BIT NOT NULL,
@@ -118,7 +118,7 @@ CREATE TABLE Pracownicy (
 
 CREATE TABLE Cechy_nieruchomości (
     ID_nieruchomości INT,
-    Nazwa_cechy VARCHAR(450) NOT NULL,
+    Nazwa_cechy VARCHAR(450),
 
     CONSTRAINT ID_cechy PRIMARY KEY (ID_nieruchomości, Nazwa_cechy),
 

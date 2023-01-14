@@ -16,7 +16,7 @@ Spis tabel:
 15. Rezerwacje
 16. Opinie UZUPEŁNIONE
 
-Rzeczy, które mogą być NULLami: Ulica(Nieruchomości), 
+Rzeczy, które mogą być NULLami: Ulica(Nieruchomości), Email, zakończenie+trendu, opis opinii
 
 Widoki:
 
