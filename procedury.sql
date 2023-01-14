@@ -1,3 +1,6 @@
+IF OBJECT_ID('Synchronizuj', 'P') IS NOT NULL
+    DROP PROCEDURE Synchronizuj
+GO
 IF OBJECT_ID('DodajDom', 'P') IS NOT NULL
     DROP PROCEDURE DodajDom
 GO
@@ -10,8 +13,8 @@ GO
 IF OBJECT_ID('DodajNieruchomość', 'P') IS NOT NULL
     DROP PROCEDURE DodajNieruchomość
 GO
-IF OBJECT_ID('Synchronizuj', 'P') IS NOT NULL
-    DROP PROCEDURE Synchronizuj
+IF OBJECT_ID('DodajOgłoszenie', 'P') IS NOT NULL
+    DROP PROCEDURE DodajOgłoszenie
 GO
 IF OBJECT_ID('ZakupNieruchomości', 'P') IS NOT NULL
     DROP PROCEDURE ZakupNieruchomości
@@ -29,53 +32,80 @@ AS
     VALUES (@ID, @Type, @Rooms, @Floors, @Heating)
 GO
 
-CREATE PROCEDURE (DodajMieszkanie @ID INT, @Type VARCHAR(MAX), @Floor INT, @Heating BIT, @Lift BIT)
+CREATE PROCEDURE DodajMieszkanie (@ID INT, @Flat_number INT, @Type VARCHAR(MAX), @Floor INT, @Heating BIT, @Lift BIT)
 AS
     INSERT INTO Mieszkania
-    VALUES (@ID, @Type, @Floor, @Heating, @Lift)
+    VALUES (@ID, @Flat_number, @Type, @Floor, @Heating, @Lift)
 GO
 
-CREATE PROCEDURE (DodajDziałkę @ID INT, @Type VARCHAR(MAX), @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT)
+CREATE PROCEDURE DodajDziałkę (@ID INT, @Type VARCHAR(MAX), @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT)
 AS
     INSERT INTO Działki
     VALUES (@ID, @Type, @Electricty, @Gas, @Water, @Sewers)
 GO
 
-CREATE PROCEDURE DodajNieruchomość (@Type_of_estate VARCHAR(MAX), @Street VARCHAR(20), @Number INT, @Place VARCHAR(MAX), @Space INT, @Price INT, @Negotiable BIT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @HeatingType VARCHAR(MAX), @Floor INT, @HeatingBit BIT, @Lift BIT, @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT) 
+CREATE PROCEDURE DodajNieruchomość (@Type_of_estate VARCHAR(MAX), @Street VARCHAR(20), @Number INT, @Place VARCHAR(MAX), @Space INT, @Price INT, @Negotiable BIT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @HeatingType VARCHAR(MAX), @Flat_number INT, @Floor INT, @HeatingBit BIT, @Lift BIT, @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT) 
 AS
-    INSERT INTO Nieruchomości VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+    IF NOT EXISTS(SELECT * FROM Nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space) BEGIN
+        INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
 
-    DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
+        DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
 
-    IF @Type_of_estate = 'dom' BEGIN
-        EXEC DodajDom (@ID, @Type, @Rooms, @Floors, @HeatingType)
-        PRINT('Dodano ogłoszenie domu!')
+        IF @Type_of_estate = 'dom' BEGIN
+            EXEC DodajDom @ID, @Type, @Rooms, @Floors, @HeatingType
+            PRINT('Dodano ogłoszenie domu!')
+        END
+        ELSE IF @Type_of_estate = 'mieszkanie' BEGIN
+            EXEC DodajMieszkanie @ID, @Flat_number, @Type, @Floor, @HeatingBit, @Lift
+            PRINT('Dodano ogłoszenie mieszkania!')
+        END
+        ELSE IF @Type_of_estate = 'działka' BEGIN
+            EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
+            PRINT('Dodano ogłoszenie działki!')
+        END
+        ELSE BEGIN
+            PRINT('BŁĄD - zły typ nieruchomości!')
+        END
     END
-    ELSE IF @Type_of_estate = 'mieszkanie' BEGIN
-        EXEC DodajMieszkanie (@ID, @Type, @Floor, @HeatingBit, @Lift)
-        PRINT('Dodano ogłoszenie mieszkania!')
-    END
-    ELSE IF @Type_of_estate = 'działka' BEGIN
-        EXEC DodajDziałkę (@ID, @Type, @Electricty, @Gas, @Water, @Sewers)
-        PRINT('Dodano ogłoszenie działki!')
+    ELSE IF @Type_of_estate = 'działka' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND Numer_mieszkania = @Flat_number) BEGIN
+            INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+            EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
+            PRINT('Dodano ogłoszenie działki!')
     END
     ELSE BEGIN
-        PRINT('BŁĄD - zły typ nieruchomości!')
+        PRINT('BŁĄD - w bazie istnieje już ta nieruchomość!')
     END
+    
 GO
 
 CREATE PROCEDURE Synchronizuj
 AS
-	INSERT INTO Niesprzedane SELECT ID_aktualne FROM Aktualne INNER JOIN Wszystkie_oferty ON Aktualne.ID_aktualne = Wszystkie_oferty.ID_oferty WHERE Data_zakończenia < GETDATE()
+    INSERT INTO Aktualne SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_aktualne FROM Aktualne) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia > GETDATE()
+
+    INSERT INTO Niesprzedane SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_niesprzedane FROM Niesprzedane) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia <= GETDATE()
+
 	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
 
     DELETE FROM Rezerwacje WHERE Koniec <= GETDATE()
 
-    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek >= GETDATE() AND Koniec < GETDATE())
-
-    DELETE FROM Trendy_rynkowe WHERE Koniec IS NOT NULL AND Koniec <= GETDATE()
+    DELETE FROM Trendy_rynkowe WHERE Zakończenie IS NOT NULL AND Zakończenie <= GETDATE()
 
     PRINT('SUKCES - synchronizacja przebiegła pomyślnie!')
+GO
+
+CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @Start DATETIME, @End DATETIME)
+AS
+    IF @EstateID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
+        IF @EstateID NOT IN (SELECT ID_aktualne FROM AKTUALNE) BEGIN
+            INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES (@EstateID, @Start, @End)
+        END
+        ELSE BEGIN
+            PRINT('BŁĄD - istnieje już ogłoszenie dla tej nieruchomości!')
+        END
+    END
+    ELSE BEGIN
+        PRINT('BŁĄD - nie istnieje nieruchomość o takim ID!')
+    END
 GO
 
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @ClientID INT)
