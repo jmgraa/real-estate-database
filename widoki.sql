@@ -147,7 +147,7 @@ CREATE VIEW Pracownik_aktualne AS
 	INNER JOIN Wszystkie_oferty W ON
 	W.Pracownik_obsługujący = O.Pesel
 	LEFT JOIN
-	Aktualne_oferty A ON
+	Aktualne A ON
 	W.ID_oferty = A.ID_aktualne
 GROUP BY O.Pesel
 GO
