@@ -18,6 +18,9 @@ Spis tabel:
 
 Rzeczy, które mogą być NULLami: Ulica(Nieruchomości), Email, zakończenie+trendu, opis opinii
 
+- usunięcie terminów oglądania dla sprzedanych
+- możliwość zakupu dla rezerwującego
+
 Widoki:
 
 1. //aktualne oferty z danego miasta

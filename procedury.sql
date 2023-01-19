@@ -75,21 +75,32 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - w bazie istnieje już ta nieruchomość!')
     END
+
+    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE Synchronizuj
 AS
+    --dodanie do aktualnych oferty tych, które jeszcze się nie przedawniły, nie zostały sprzedana oraz nie są już w aktualnych
     INSERT INTO Aktualne SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_aktualne FROM Aktualne) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia > GETDATE()
 
+    --dodanie do niesprzedanych ofert tych, które przedawniły się i nie są one już w niesprzedanych lub w sprzedancyh
     INSERT INTO Niesprzedane SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_niesprzedane FROM Niesprzedane) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia <= GETDATE()
 
+    --usunięcie przedawnionych ofert z aktualnych
 	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
 
+    --usuniecie z aktualnych ofert, które są aktualnie zarezerwowane
     DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek <= GETDATE() AND Koniec > GETDATE()) 
 
+    --dodanie do aktualnych oferty ktorej rezerwacja sie skonczyla i nie jest w aktualnych
     INSERT INTO Aktualne SELECT ID_oferty FROM Rezerwacje WHERE Koniec <= GETDATE() AND (ID_oferty NOT IN (SELECT ID_oferty FROM Aktualne))
 
+    --usuniecie przedawnionego trendu
     DELETE FROM Trendy_rynkowe WHERE Zakończenie IS NOT NULL AND Zakończenie <= GETDATE()
+
+    --usuniecie przedawnionego terminu oglądania
+    DELETE FROM Terminy_oglądania WHERE Data_zwiedzania_koniec <= GETDATE()
 
     PRINT('SUKCES - synchronizacja przebiegła pomyślnie!')
 GO
@@ -113,6 +124,8 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - nie istnieje nieruchomość o takim ID!')
     END
+
+    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @ClientID INT)
@@ -132,6 +145,8 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - nieruchomość o podanym ID nie istenieje lub nie jest obecnie dostępna!')
     END
+
+    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID INT, @Start DATETIME, @End DATETIME)
@@ -140,15 +155,9 @@ AS
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
         IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-            IF @Start < @End BEGIN                    
-                DECLARE @employee INT = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
-                IF @employee IN (SELECT Pracownik_obsługujący FROM Rezerwacje INNER JOIN Wszystkie_oferty ON Rezerwacje.ID_oferty = Wszystkie_oferty.ID_oferty WHERE (@Start < Początek AND @End < Początek) OR (@Start > Początek AND @End > Koniec)) BEGIN
-                    INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
-                    PRINT('SUKCES - pomyślnie dodano rezerwację!')
-                END
-                ELSE BEGIN
-                    PRINT('BŁĄD - pracownik obsługujący ogłosznie jest w danym terminie zajęty!')
-                END
+            IF @Start < @End BEGIN                   
+                INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
+                PRINT('SUKCES - pomyślnie dodano rezerwację!')
             END
             ELSE BEGIN
                 PRINT('BŁĄD - niewłaściwy przedział czasowy!')
@@ -161,6 +170,8 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - nie istnieje ogłoszenie o takim ID!')
     END
+
+    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE DodajOpinię (@CustomerID INT, @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
@@ -177,4 +188,40 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - klient o podanym ID nie istnieje, nie zakupił żadnej nieruchomości lub tej o podanym ID!')
     END
+
+    EXEC Synchronizuj
+GO
+
+CREATE PROCEDURE ZarezrewujTerminOglądania (@CustomerID INT, @OfferID INT, @Start DATETIME, @End DATETIME)
+AS
+    IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN 
+        IF @Start < @End BEGIN
+
+
+
+
+
+            DECLARE @employee VARCHAR(11) = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
+            IF @employee NOT IN (SELECT Pracownik_obsługujący FROM Terminy_oglądania INNER JOIN Wszystkie_oferty ON Terminy_oglądania.ID_oferty = Wszystkie_oferty.ID_oferty WHERE Pracownik_obsługujący = @employee AND (@Start >= Data_zwiedzania_początek AND @End < Data_zwiedzania_koniec) OR @Start < Data_zwiedzania_początek AND @End > Data_zwiedzania_początek) BEGIN
+                IF DATEDIFF(SECOND, @Start, @End) <= 1800 BEGIN
+                    INSERT INTO Terminy_oglądania(ID_oferty, ID_oglądającego, Data_zwiedzania_początek, Data_zwiedzania_koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
+                    PRINT('SUKCES - zarezerwowano termin oglądania')
+                END
+                ELSE BEGIN
+                    PRINT('BŁĄD - jedna wizyta nie może trwać dłużej niż 30 minut!')
+                END
+            END
+            ELSE BEGIN
+                PRINT('BŁĄD - pracownik jest zajęty w tym terminie!')
+            END
+        END
+        ELSE BEGIN
+            PRINT('BŁĄD - niewłaściwy przedział czasowy')
+        END   
+    END
+    ELSE BEGIN
+        PRINT('BŁĄD - nie istnieje aktualna oferta o podanym ID!')
+    END
+
+    EXEC Synchronizuj
 GO

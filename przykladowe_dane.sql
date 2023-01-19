@@ -180,68 +180,110 @@ INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończe
 (13, '2022-03-11 18:01:00', '2023-05-29 14:54:00'),
 (49, '2022-09-07 05:09:00', '2023-09-12 01:58:00'),
 (34, '2022-05-26 11:56:00', '2023-07-28 13:28:00'),
-(20, '2022-07-24 04:11:00', '2023-10-25 00:12:00'),
-(23, '2022-01-14 15:04:00', '2023-11-20 08:03:00'),
-(22, '2022-08-08 23:42:00', '2022-11-10 13:30:00'),
-(15, '2022-06-16 06:09:00', '2023-11-25 10:43:00'),
+(20, '2022-07-24 04:11:00', '2023-10-25 00:12:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(14, '06222615688','2022-07-20 12:15:00', '2023-07-27 21:43:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
+(23, '2022-01-14 15:04:00', '2023-11-20 08:03:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(22, '08211717919' , '2022-08-08 23:42:00', '2022-11-10 13:30:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
+(15, '2022-06-16 06:09:00', '2023-11-25 10:43:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(16,'08211717919', '2022-12-28 15:41:00', '2023-12-29 02:00:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
 (3, '2022-01-23 04:44:00', '2023-12-29 04:47:00'),
-(47, '2022-07-17 07:53:00', '2022-12-29 05:24:00'),
-(29, '2022-05-03 01:00:00', '2023-06-17 10:41:00'),
-(43, '2022-03-06 04:47:00', '2022-07-14 06:43:00'),
-(42, '2022-01-21 14:13:00', '2022-08-25 22:18:00'),
-(19, '2022-03-01 21:07:00', '2022-08-04 00:37:00'),
-(31, '2022-11-19 23:43:00', '2022-12-25 11:49:00'),
+(47, '2022-07-17 07:53:00', '2023-12-29 05:24:00'),
+(29, '2022-05-03 01:00:00', '2023-06-17 10:41:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(43, '66101346533', '2022-03-06 04:47:00', '2022-07-14 06:43:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(17,'06222615688', '2022-07-25 14:22:00', '2023-08-29 05:07:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
+(42, '2022-01-21 14:13:00', '2023-08-25 22:18:00'),
+(19, '2022-03-01 21:07:00', '2023-08-04 00:37:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(31, '98032847584', '2022-11-19 23:43:00', '2022-12-25 11:49:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(26,'51050368561','2022-06-19 09:51:00', '2023-06-21 05:05:00'),
+(27, '72060266230','2022-09-12 05:32:00', '2023-09-15 12:25:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
 (9, '2022-10-04 20:42:00', '2023-12-11 14:18:00'),
 (21, '2022-07-11 17:17:00', '2023-10-26 23:05:00'),
-(39, '2022-03-09 10:03:00', '2023-05-21 18:05:00'),
+(39, '2022-03-09 10:03:00', '2023-05-21 18:05:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(32,'06222615688', '2022-10-16 07:28:00', '2023-12-18 15:00:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
 (45, '2022-05-20 06:50:00', '2023-11-24 00:44:00'),
-(2, '2022-04-21 23:49:00', '2023-12-22 09:07:00'),
-(10, '2022-05-20 20:29:00', '2022-11-23 08:21:00'),
+(2, '2022-04-21 23:49:00', '2023-12-22 09:07:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(10, '78010392383', '2022-05-20 20:29:00', '2022-11-23 08:21:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(33,'98032847584', '2022-07-25 08:37:00', '2023-12-28 05:01:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
 (1, '2022-10-12 13:34:00', '2023-10-14 06:45:00'),
-(11, '2022-11-20 03:38:00', '2022-12-27 10:14:00'),
-(6, '2022-12-09 00:09:00', '2022-12-23 01:57:00'),
+(11, '2022-11-20 03:38:00', '2023-12-27 10:14:00'),
+(6, '2022-12-09 00:09:00', '2023-12-23 01:57:00'),
 (28, '2022-04-16 15:30:00', '2023-12-19 06:05:00'),
 (18, '2022-02-14 12:13:00', '2023-05-25 22:52:00'),
 (40, '2022-06-04 09:28:00', '2023-11-20 07:06:00'),
-(5, '2022-03-23 01:14:00', '2022-04-29 14:55:00'),
-(38, '2022-08-28 04:25:00', '2022-08-29 00:22:00'),
-(50, '2022-07-01 01:41:00', '2022-10-24 02:39:00'),
+(5, '2022-03-23 01:14:00', '2023-04-29 14:55:00'),
+(38, '2022-08-28 04:25:00', '2023-08-29 00:22:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(44,'08211717919','2022-03-26 13:27:00', '2023-08-29 00:42:00'),
+(50, '98032847584', '2022-07-01 01:41:00', '2022-10-24 02:39:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
 (36, '2022-06-25 07:52:00', '2023-07-28 10:57:00'),
 (35, '2022-05-08 15:27:00', '2023-12-29 11:45:00'),
-(12, '2022-01-10 21:05:00', '2022-11-19 00:36:00'),
+(12, '2022-01-10 21:05:00', '2023-11-19 00:36:00'),
 (24, '2022-01-28 08:42:00', '2023-03-29 14:07:00'),
 (41, '2022-02-18 16:49:00', '2023-12-24 02:26:00'),
-(8, '2022-07-01 00:48:00', '2023-10-12 11:32:00'),
-(4, '2022-09-07 12:51:00', '2022-12-10 16:08:00'),
-(48, '2022-05-23 11:38:00', '2023-10-26 17:43:00'),
-(25, '2022-03-08 04:14:00', '2022-07-09 13:57:00'),
+(8, '2022-07-01 00:48:00', '2023-10-12 11:32:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(4, '94081458182', '2022-09-07 12:51:00', '2022-12-10 16:08:00'),
+(46,'94081458182','2022-01-28 22:06:00', '2023-02-28 21:49:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
+(48, '2022-05-23 11:38:00', '2023-10-26 17:43:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
+(25, '14270861456', '2022-03-08 04:14:00', '2022-07-09 13:57:00')
+
+INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES
 (7, '2022-01-28 14:31:00', '2023-04-29 11:46:00'),
 (37, '2022-06-03 11:50:00', '2023-08-06 20:17:00'),
 (30, '2022-11-10 03:33:00', '2023-11-16 20:57:00')
 
-
-INSERT INTO Wszystkie_oferty(ID_nieruchomości, Pracownik_obsługujący, Data_wystawienia, Data_zakończenia) VALUES
-(14, '06222615688','2022-07-20 12:15:00', '2023-07-27 21:43:00'),
-(16,'08211717919', '2022-12-28 15:41:00', '2023-12-29 02:00:00'),
-(17,'06222615688', '2022-07-25 14:22:00', '2023-08-29 05:07:00'),
-(26,'51050368561','2022-06-19 09:51:00', '2023-06-21 05:05:00'),
-(27, '72060266230','2022-09-12 05:32:00', '2023-09-15 12:25:00'),
-(32,'06222615688', '2022-10-16 07:28:00', '2023-12-18 15:00:00'),
-(33,'98032847584', '2022-07-25 08:37:00', '2023-12-28 05:01:00'),
-(44,'08211717919','2022-03-26 13:27:00', '2023-08-29 00:42:00'),
-(46,'94081458182','2022-01-28 22:06:00', '2023-02-28 21:49:00')
-
-
 INSERT INTO Sprzedane VALUES 
-(26, '08230862902', '2022-12-26 10:14:00', 1),
-(27, '10300356413', '2022-12-10 11:57:00', 1),
-(16, '20082281942', '2022-07-01 15:00:00', 1),
-(17, '22110855460', '2022-12-24 00:00:00', 1),
-(32, '24102948963', '2022-08-29 04:25:00', 1),
-(33, '31072069990', '2022-08-01 12:41:00', 1),
-(44, '35020376651', '2022-12-10 14:00:00', 1),
-(46, '40071541277', '2022-05-10 10:14:00', 1),
-(14, '50021223412', '2022-03-21 12:00:00', 1)
+(5, '08230862902', '2022-12-26 10:14:00', 1),
+(9, '10300356413', '2022-12-10 11:57:00', 1),
+(14, '20082281942', '2022-07-01 15:00:00', 1),
+(18, '22110855460', '2022-12-24 00:00:00', 1),
+(19, '24102948963', '2022-08-29 04:25:00', 1),
+(23, '31072069990', '2022-08-01 12:41:00', 1),
+(27, '35020376651', '2022-12-10 14:00:00', 1),
+(36, '40071541277', '2022-05-10 10:14:00', 1),
+(45, '50021223412', '2022-03-21 12:00:00', 1)
 
 INSERT INTO Trendy_rynkowe(Nazwa_trendu, Rozpoczęcie, Zakończenie, Miejscowość, Zmiana_mnożnika) VALUES
 ('spadek', '2022-09-08 00:44:00', '2023-09-15 18:44:00', 'Nowe Brzesko', 0.06),
@@ -268,13 +310,13 @@ INSERT INTO Trendy_rynkowe(Nazwa_trendu, Rozpoczęcie, Zakończenie, Miejscowoś
 ('spadek', '2022-02-09 20:51:00', '2023-06-18 06:39:00', 'Białe Błota', 0.04)
 
 INSERT INTO Opinie(ID_oferty, Data_wystawienia_opinii, Ocena, Opis) VALUES
-(26, '2022-12-29 12:12:00', 10, 'Działanie firmy pośredniczącej w sprzedaży było bardzo szybkie i sprawne.'),
-(27, '2022-12-16 10:52:00', 8, 'Nieruchomość była zadbana i dobrze utrzymana.'),
-(16, '2022-07-02 09:32:00', 9, 'Nieruchomość była w doskonałym stanie i gotowa do zamieszkania od razu po zakupie.'),
-(32, '2022-09-02 13:44:00', 6, 'Nieruchomość była w średnim stanie i wymagała drobnych prac remontowych.'),
-(44, '2022-12-12 17:22:00', 2, 'Pracownik był nieodpowiedzialny i często spóźniał się na spotkania z klientami.'),
-(46, '2022-05-10 19:37:00', 4, 'Pracownik nie był zbyt pomocny i brakowało mu chęci do pracy.'),
-(14, '2022-03-25 14:43:00', 10, 'Nieruchomość była nowoczesna i wyposażona we wszystkie niezbędne udogodnienia.')
+(9, '2022-12-29 12:12:00', 10, 'Działanie firmy pośredniczącej w sprzedaży było bardzo szybkie i sprawne.'),
+(14, '2022-12-16 10:52:00', 8, 'Nieruchomość była zadbana i dobrze utrzymana.'),
+(19, '2022-07-02 09:32:00', 9, 'Nieruchomość była w doskonałym stanie i gotowa do zamieszkania od razu po zakupie.'),
+(27, '2022-09-02 13:44:00', 6, 'Nieruchomość była w średnim stanie i wymagała drobnych prac remontowych.'),
+(36, '2022-12-12 17:22:00', 2, 'Pracownik był nieodpowiedzialny i często spóźniał się na spotkania z klientami.'),
+(45, '2022-05-10 19:37:00', 4, 'Pracownik nie był zbyt pomocny i brakowało mu chęci do pracy.'),
+(5, '2022-03-25 14:43:00', 10, 'Nieruchomość była nowoczesna i wyposażona we wszystkie niezbędne udogodnienia.')
 
 INSERT INTO Cechy_nieruchomości VALUES
 (5, 'garaż'),

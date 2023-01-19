@@ -6,9 +6,7 @@ Projekt "Baza danych firmy pośredniczącej w sprzedaży nieruchomości"
 # Założenia projektu
 Projekt dotyczył stworzenia bazy danych dla firmy pośredniczącej w sprzedaży nieruchomości. Celem projektu było stworzenie skutecznego narzędzia do zarządzania ofertami nieruchomości oraz udostępnianie ich klientom.
 
-Baza danych zawierała informacje o ofertach nieruchomości, takie jak typ nieruchomości, lokalizacja, cena itp. System umożliwia przeszukiwanie ofert według różnych kryteriów.
-
-Baza pozwala zarządzać swoimi ofertami: dodawać nowe, grupować je według status (aktualne / sprzedane / niesprzedane), publikować opinie oraz śledzić pracę pracowników. Baza danych umożliwia również automatyczne modyfikowanie cen istniejących ofert, zgodnie z tym co obecnie dzieje się na rynku (treny).
+Baza danych zawiera informacje o ofertach nieruchomości, takie jak typ nieruchomości, lokalizacja, cena itp oraz pozwala zarządzać nimi: dodawać nowe oferty, grupować je według status (aktualne / sprzedane / niesprzedane), publikować opinie oraz śledzić pracę pracowników. Baza danych umożliwia również automatyczne modyfikowanie cen istniejących ofert, zgodnie z tym co obecnie dzieje się na rynku (trendy).
 
 ## Schemat Pielęgnacji Bazy Danych
 
@@ -50,12 +48,25 @@ Poniższa procedura synchronizuje wszystkie tabele w bazie, których zawartość
 ```tsql
 CREATE PROCEDURE Synchronizuj
 AS
-	INSERT INTO Niesprzedane SELECT ID_aktualne FROM Aktualne INNER JOIN Wszystkie_oferty ON Aktualne.ID_aktualne = Wszystkie_oferty.ID_oferty WHERE Data_zakończenia < GETDATE()
+    --dodanie do aktualnych oferty, która jeszcze się nie przedawniła, nie została sprzedana oraz nie jest już w aktualnych
+    INSERT INTO Aktualne SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_aktualne FROM Aktualne) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia > GETDATE()
+
+    --dodanie do niesprzedanych ofert tych, które przedawniły się i nie są one już w niesprzedanych lub w sprzedancyh
+    INSERT INTO Niesprzedane SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_niesprzedane FROM Niesprzedane) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia <= GETDATE()
+
+    --usunięcie przedawnionej oferty
 	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
 
-	DELETE FROM Rezerwacje WHERE Koniec <= GETDATE()
+    --usuniecie z aktualnych oferty, ktora jest aktualnie zarezerwowana
+    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek <= GETDATE() AND Koniec > GETDATE()) 
 
-    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek >= GETDATE() AND Koniec < GETDATE())
+    --dodanie do aktualnych oferty ktorej rezerwacja sie skonczyla i nie jest w aktualnych
+    INSERT INTO Aktualne SELECT ID_oferty FROM Rezerwacje WHERE Koniec <= GETDATE() AND (ID_oferty NOT IN (SELECT ID_oferty FROM Aktualne))
+
+    --usuniecie przedawnionego trendu
+    DELETE FROM Trendy_rynkowe WHERE Zakończenie IS NOT NULL AND Zakończenie <= GETDATE()
+
+    PRINT('SUKCES - synchronizacja przebiegła pomyślnie!')
 GO
 ```
 Poniższe cztery procedury odpowiadają za dodanie konkretnej nieruchomości do bazy. W interfejsie graficznym wyglądałoby to tak, że po wybraniu typu nieruchomości, pojawiają się kolejne okienka z moliwościa wprowadzenia odpowiednej informacji. W naszym przypadku będziemy przekazywali do procedury odpowiednie informacje, a pozostałe pola wypełnimy NULLami.

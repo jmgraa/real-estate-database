@@ -129,16 +129,15 @@ CREATE TABLE Cechy_nieruchomości (
 )
 
 CREATE TABLE Terminy_oglądania (
-    ID_terminu INT PRIMARY KEY,
+    ID_terminu INT IDENTITY(1,1) PRIMARY KEY,
 
+    ID_oferty INT NOT NULL,
     ID_oglądającego VARCHAR(11) NOT NULL,
-    ID_pracownika VARCHAR(11) NOT NULL,
-    Data_zwiedzania DATETIME NOT NULL,
-    Miejsce_zwiedzania INT NOT NULL,
-
+    Data_zwiedzania_początek DATETIME NOT NULL,
+    Data_zwiedzania_koniec DATETIME NOT NULL,
+    
+    FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne),
     FOREIGN KEY (ID_oglądającego) REFERENCES Klienci(ID_klienta),    
-    FOREIGN KEY (Miejsce_zwiedzania) REFERENCES Nieruchomości(ID_nieruchomości),
-    FOREIGN KEY (ID_pracownika) REFERENCES Pracownicy(ID_pracownika)
 )
 
 CREATE TABLE Wszystkie_oferty (

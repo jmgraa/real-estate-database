@@ -44,6 +44,8 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
+
+    EXEC Synchronizuj
 END
 GO
 
@@ -77,6 +79,8 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
+
+    EXEC Synchronizuj
 END
 GO
 
@@ -103,6 +107,8 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
+
+    EXEC Synchronizuj
 END
 GO
 
@@ -125,6 +131,8 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
+
+    EXEC Synchronizuj
 END
 GO
 
@@ -147,5 +155,25 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
+
+    EXEC Synchronizuj
+END
+GO
+
+CREATE TRIGGER UsunięcieTerminówOglądania
+ON Aktualne
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @loop_border INT = (SELECT MAX(ID_aktualne) FROM DELETED)
+    DECLARE @iterator INT = (SELECT MIN(ID_aktualne) FROM DELETED)
+
+    WHILE(@iterator <= @loop_border) BEGIN
+        IF EXISTS(SELECT ID_aktualne FROM DELETED WHERE ID_aktualne = @iterator) BEGIN
+            DELETE FROM Terminy_oglądania WHERE ID_oferty = ID_aktualne
+        END
+    END
+
+    EXEC Synchronizuj
 END
 GO
