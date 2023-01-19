@@ -22,11 +22,11 @@ IF OBJECT_ID('Aktualne_z_miasta', 'IF') IS NOT NULL
     DROP FUNCTION Aktualne_z_miasta
 GO
 
-IF OBJECT_ID('Oferty_typu', 'IF') IS NOT NULL
+IF OBJECT_ID('Oferty_typu', 'TF') IS NOT NULL
     DROP FUNCTION Oferty_typu
 GO
 
-IF OBJECT_ID('Ofety_od_do','IF') IS NOT NULL
+IF OBJECT_ID('Oferty_od_do','IF') IS NOT NULL
     DROP FUNCTION Oferty_od_do
  GO
  
@@ -37,7 +37,6 @@ GO
 IF OBJECT_ID('Info_oferta', 'IF') IS NOT NULL
 	DROP FUNCTION Info_oferta
 	
-	
 IF OBJECT_ID('Pracownik_aktualne', 'V') IS NOT NULL
     DROP VIEW Pracownik_aktualne
 GO
@@ -46,7 +45,6 @@ IF OBJECT_ID('Pracownik_sprzedane', 'V') IS NOT NULL
     DROP VIEW Pracownik_sprzedane
 GO
 
-
 IF OBJECT_ID('Pracownik_niesprzedane', 'V') IS NOT NULL
     DROP VIEW Pracownik_niesprzedane
 GO
@@ -54,7 +52,6 @@ GO
 IF OBJECT_ID('Pracownik_statystyki', 'V') IS NOT NULL
     DROP VIEW Pracownik_statystyki
 GO
-
 
 CREATE VIEW Ranking_pracowników AS
 	SELECT Os.Imię, Os.Nazwisko, P.ID_pracownika, AVG(O.Ocena) AS Średnia_ocena FROM Opinie O
@@ -127,15 +124,12 @@ BEGIN
 END
 GO
 
-
-
 CREATE FUNCTION Oferty_od_do(@a INT, @b INT)
 RETURNS TABLE
 AS
 RETURN
 	SELECT * FROM Nieruchomości WHERE Nieruchomości.Cena >= @a AND Nieruchomości.Cena <= @b;
 GO
-
 
 CREATE FUNCTION Info_oferta(@x INT)
 RETURNS TABLE
@@ -187,4 +181,3 @@ CREATE VIEW Pracownik_statystyki AS
 	INNER JOIN Pracownik_niesprzedane Pn ON
 	Pn.Pesel = O.Pesel
 GO
-
