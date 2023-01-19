@@ -13,9 +13,6 @@ GO
 IF OBJECT_ID('ZwolnieniePracownikaNiesprzedane', 'TR') IS NOT NULL
     DROP TRIGGER ZwolnieniePracownikaNiesprzedane
 GO
-IF OBJECT_ID('KoniecRezerwacji', 'TR') IS NOT NULL
-    DROP TRIGGER KoniecRezerwacji
-GO
 
 CREATE TRIGGER DodanieTrendu
 ON Trendy_rynkowe
@@ -150,14 +147,5 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
-END
-GO
-
-CREATE TRIGGER KoniecRezerwacji
-ON Rezerwacje
-AFTER DELETE
-AS
-BEGIN
-    INSERT INTO Aktualne SELECT ID_oferty FROM DELETED 
 END
 GO

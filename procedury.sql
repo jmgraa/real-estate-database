@@ -67,15 +67,14 @@ AS
             PRINT('BŁĄD - zły typ nieruchomości!')
         END
     END
-    ELSE IF @Type_of_estate = 'działka' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND Numer_mieszkania = @Flat_number) BEGIN
-            INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
-            EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
-            PRINT('Dodano ogłoszenie działki!')
+    ELSE IF @Type_of_estate = 'mieszkanie' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND Numer_mieszkania = @Flat_number) BEGIN
+        INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+        EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
+        PRINT('Dodano ogłoszenie mieszkania!')
     END
     ELSE BEGIN
         PRINT('BŁĄD - w bazie istnieje już ta nieruchomość!')
     END
-    
 GO
 
 CREATE PROCEDURE Synchronizuj
@@ -86,7 +85,9 @@ AS
 
 	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
 
-    DELETE FROM Rezerwacje WHERE Koniec <= GETDATE()
+    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek <= GETDATE() AND Koniec > GETDATE()) 
+
+    INSERT INTO Aktualne SELECT ID_oferty FROM Rezerwacje WHERE Koniec <= GETDATE() AND (ID_oferty NOT IN (SELECT ID_oferty FROM Aktualne))
 
     DELETE FROM Trendy_rynkowe WHERE Zakończenie IS NOT NULL AND Zakończenie <= GETDATE()
 
@@ -97,10 +98,16 @@ CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @Start DATETIME, @End DATETIME
 AS
     IF @EstateID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
         IF @EstateID NOT IN (SELECT ID_aktualne FROM AKTUALNE) BEGIN
-            INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES (@EstateID, @Start, @End)
+            IF @Start < @End BEGIN
+                INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES (@EstateID, @Start, @End)
+                PRINT('SUKCES - pomyślnie dodano ogłoszenie!')
+            END
+            ELSE BEGIN
+                PRINT('BŁĄD - niewłaściwy przedział czasowy!')
+            END
         END
         ELSE BEGIN
-            PRINT('BŁĄD - istnieje już ogłoszenie dla tej nieruchomości!')
+            PRINT('BŁĄD - istnieje już  aktualne ogłoszenie dla tej nieruchomości!')
         END
     END
     ELSE BEGIN
@@ -110,9 +117,11 @@ GO
 
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @ClientID INT)
 AS
-    IF @OfferID IN (SELECT ID_nieruchomości FROM Wszystkie_oferty) BEGIN
+    IF @OfferID IN (SELECT ID_nieruchomości FROM Aktualne INNER JOIN Wszystkie_oferty ON Aktualne.ID_aktualne = Wszystkie_oferty.ID_oferty) BEGIN
         DECLARE @place INT = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
-        DECLARE @mutlplier INT = (SELECT Sum(Zmiana_mnożnika) FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
+
+        DECLARE @mutlplier INT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
+
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_nieruchomości = @OfferID)
 
         INSERT INTO Sprzedane VALUES (@EstateID, @ClientID, GETDATE(), @mutlplier)
@@ -130,28 +139,23 @@ AS
     IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
-        IF @OfferID NOT IN (SELECT ID_rezerwacji FROM Rezerwacje) BEGIN
-            IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-                IF @Start < @End BEGIN                    
-                    DECLARE @employee INT = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
-                    IF @employee IN (SELECT Pracownik_obsługujący FROM Rezerwacje INNER JOIN Wszystkie_oferty ON Rezerwacje.ID_oferty = Wszystkie_oferty.ID_oferty WHERE (@Start < Początek AND @End < Początek) OR (@Start > Początek AND @End > Koniec)) BEGIN
-                        INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
-                        PRINT('SUKCES - pomyślnie dodano rezerwację!')
-                    END
-                    ELSE BEGIN
-                        PRINT('BŁĄD - pracownik obsługujący ogłosznie jest w danym terminie zajęty!')
-                    END
+        IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
+            IF @Start < @End BEGIN                    
+                DECLARE @employee INT = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
+                IF @employee IN (SELECT Pracownik_obsługujący FROM Rezerwacje INNER JOIN Wszystkie_oferty ON Rezerwacje.ID_oferty = Wszystkie_oferty.ID_oferty WHERE (@Start < Początek AND @End < Początek) OR (@Start > Początek AND @End > Koniec)) BEGIN
+                    INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
+                    PRINT('SUKCES - pomyślnie dodano rezerwację!')
                 END
                 ELSE BEGIN
-                    PRINT('BŁĄD - niewłaściwy przedział czasowy rezerwacji!')
+                    PRINT('BŁĄD - pracownik obsługujący ogłosznie jest w danym terminie zajęty!')
                 END
             END
             ELSE BEGIN
-                PRINT('BŁĄD - to ogłosznie nie jest już aktualne!')
+                PRINT('BŁĄD - niewłaściwy przedział czasowy!')
             END
         END
         ELSE BEGIN
-            PRINT('BŁĄD - ta nieruchomość jest już zarezerwowana - proszę spróbować później!')
+            PRINT('BŁĄD - to ogłosznie nie jest już aktualne!')
         END
     END
     ELSE BEGIN
