@@ -13,6 +13,12 @@ GO
 IF OBJECT_ID('ZwolnieniePracownikaNiesprzedane', 'TR') IS NOT NULL
     DROP TRIGGER ZwolnieniePracownikaNiesprzedane
 GO
+IF OBJECT_ID('UsunięcieTerminówOglądaniaSprzedane', 'TR') IS NOT NULL
+    DROP TRIGGER UsunięcieTerminówOglądaniaSprzedane
+GO
+IF OBJECT_ID('UsunięcieTerminówOglądaniaNiesprzedane', 'TR') IS NOT NULL
+    DROP TRIGGER UsunięcieTerminówOglądaniaNiesprzedane
+GO
 
 CREATE TRIGGER DodanieTrendu
 ON Trendy_rynkowe
@@ -44,8 +50,6 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
-
-    EXEC Synchronizuj
 END
 GO
 
@@ -79,8 +83,6 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
-
-    EXEC Synchronizuj
 END
 GO
 
@@ -107,8 +109,6 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
-
-    EXEC Synchronizuj
 END
 GO
 
@@ -131,8 +131,6 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
-
-    EXEC Synchronizuj
 END
 GO
 
@@ -155,25 +153,41 @@ BEGIN
 
         SET @iterator = @iterator + 1           
     END
-
-    EXEC Synchronizuj
 END
 GO
 
-CREATE TRIGGER UsunięcieTerminówOglądania
-ON Aktualne
-AFTER DELETE
+CREATE TRIGGER UsunięcieTerminówOglądaniaSprzedane
+ON Sprzedane
+AFTER INSERT
 AS
 BEGIN
-    DECLARE @loop_border INT = (SELECT MAX(ID_aktualne) FROM DELETED)
-    DECLARE @iterator INT = (SELECT MIN(ID_aktualne) FROM DELETED)
+    DECLARE @loop_border INT = (SELECT MAX(ID_sprzedane) FROM INSERTED)
+    DECLARE @iterator INT = (SELECT MIN(ID_sprzedane) FROM INSERTED)
 
     WHILE(@iterator <= @loop_border) BEGIN
-        IF EXISTS(SELECT ID_aktualne FROM DELETED WHERE ID_aktualne = @iterator) BEGIN
-            DELETE FROM Terminy_oglądania WHERE ID_oferty = ID_aktualne
+        IF EXISTS(SELECT ID_sprzedane FROM INSERTED WHERE ID_sprzedane = @iterator) BEGIN
+            DELETE FROM Terminy_oglądania WHERE ID_oferty = @iterator
         END
-    END
 
-    EXEC Synchronizuj
+        SET @iterator = @iterator + 1 
+    END
+END
+GO
+
+CREATE TRIGGER UsunięcieTerminówOglądaniaNiesprzedane
+ON Niesprzedane
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @loop_border INT = (SELECT MAX(ID_niesprzedane) FROM INSERTED)
+    DECLARE @iterator INT = (SELECT MIN(ID_niesprzedane) FROM INSERTED)
+
+    WHILE(@iterator <= @loop_border) BEGIN
+        IF EXISTS(SELECT ID_niesprzedane FROM INSERTED WHERE ID_niesprzedane = @iterator) BEGIN
+            DELETE FROM Terminy_oglądania WHERE ID_oferty = @iterator
+        END
+
+        SET @iterator = @iterator + 1 
+    END
 END
 GO
