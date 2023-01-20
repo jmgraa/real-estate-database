@@ -25,6 +25,35 @@ GO
 IF OBJECT_ID('DodajOpinię', 'P') IS NOT NULL
     DROP PROCEDURE DodajOpinię
 GO
+IF OBJECT_ID('ZarezrewujTerminOglądania', 'P') IS NOT NULL
+    DROP PROCEDURE ZarezrewujTerminOglądania
+GO
+
+CREATE PROCEDURE Synchronizuj
+AS
+    --dodanie do aktualnych oferty tych, które jeszcze się nie przedawniły, nie zostały sprzedana oraz nie są już w aktualnych
+    INSERT INTO Aktualne SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_aktualne FROM Aktualne) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia > GETDATE()
+
+    --dodanie do niesprzedanych ofert tych, które przedawniły się i nie są one już w niesprzedanych lub w sprzedancyh
+    INSERT INTO Niesprzedane SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_niesprzedane FROM Niesprzedane) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia <= GETDATE()
+
+    --usunięcie przedawnionych ofert z aktualnych
+	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
+
+    --usuniecie z aktualnych ofert, które są aktualnie zarezerwowane
+    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek <= GETDATE() AND Koniec > GETDATE()) 
+
+    --dodanie do aktualnych oferty ktorej rezerwacja sie skonczyla i nie jest w aktualnych
+    INSERT INTO Aktualne SELECT ID_oferty FROM Rezerwacje WHERE Koniec <= GETDATE() AND (ID_oferty NOT IN (SELECT ID_oferty FROM Aktualne))
+
+    --usuniecie przedawnionego trendu
+    DELETE FROM Trendy_rynkowe WHERE Zakończenie IS NOT NULL AND Zakończenie <= GETDATE()
+
+    --usuniecie przedawnionego terminu oglądania
+    DELETE FROM Terminy_oglądania WHERE Data_zwiedzania_koniec <= GETDATE()
+
+    PRINT('SUKCES - synchronizacja przebiegła pomyślnie!')
+GO
 
 CREATE PROCEDURE DodajDom (@ID INT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @Heating VARCHAR(MAX))
 AS
@@ -79,32 +108,6 @@ AS
     EXEC Synchronizuj
 GO
 
-CREATE PROCEDURE Synchronizuj
-AS
-    --dodanie do aktualnych oferty tych, które jeszcze się nie przedawniły, nie zostały sprzedana oraz nie są już w aktualnych
-    INSERT INTO Aktualne SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_aktualne FROM Aktualne) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia > GETDATE()
-
-    --dodanie do niesprzedanych ofert tych, które przedawniły się i nie są one już w niesprzedanych lub w sprzedancyh
-    INSERT INTO Niesprzedane SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_niesprzedane FROM Niesprzedane) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia <= GETDATE()
-
-    --usunięcie przedawnionych ofert z aktualnych
-	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
-
-    --usuniecie z aktualnych ofert, które są aktualnie zarezerwowane
-    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek <= GETDATE() AND Koniec > GETDATE()) 
-
-    --dodanie do aktualnych oferty ktorej rezerwacja sie skonczyla i nie jest w aktualnych
-    INSERT INTO Aktualne SELECT ID_oferty FROM Rezerwacje WHERE Koniec <= GETDATE() AND (ID_oferty NOT IN (SELECT ID_oferty FROM Aktualne))
-
-    --usuniecie przedawnionego trendu
-    DELETE FROM Trendy_rynkowe WHERE Zakończenie IS NOT NULL AND Zakończenie <= GETDATE()
-
-    --usuniecie przedawnionego terminu oglądania
-    DELETE FROM Terminy_oglądania WHERE Data_zwiedzania_koniec <= GETDATE()
-
-    PRINT('SUKCES - synchronizacja przebiegła pomyślnie!')
-GO
-
 CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @Start DATETIME, @End DATETIME)
 AS
     IF @EstateID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
@@ -128,16 +131,16 @@ AS
     EXEC Synchronizuj
 GO
 
-CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @ClientID INT)
+CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID INT)
 AS
-    IF @OfferID IN (SELECT ID_nieruchomości FROM Aktualne INNER JOIN Wszystkie_oferty ON Aktualne.ID_aktualne = Wszystkie_oferty.ID_oferty) BEGIN
+    IF (@OfferID IN (SELECT ID_nieruchomości FROM Aktualne INNER JOIN Wszystkie_oferty ON Aktualne.ID_aktualne = Wszystkie_oferty.ID_oferty)) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta = @CustomerID)) BEGIN
         DECLARE @place INT = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
 
         DECLARE @mutlplier INT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
 
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_nieruchomości = @OfferID)
 
-        INSERT INTO Sprzedane VALUES (@EstateID, @ClientID, GETDATE(), @mutlplier)
+        INSERT INTO Sprzedane VALUES (@EstateID, @CustomerID, GETDATE(), @mutlplier)
         DELETE FROM Aktualne WHERE ID_aktualne = @OfferID
 
         PRINT('SUKCES - udało Ci się zakupić tą nieruchmość!')
@@ -155,7 +158,7 @@ AS
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
         IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-            IF @Start < @End BEGIN                   
+            IF @Start < @End AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty) BEGIN                   
                 INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
                 PRINT('SUKCES - pomyślnie dodano rezerwację!')
             END
@@ -194,21 +197,17 @@ GO
 
 CREATE PROCEDURE ZarezrewujTerminOglądania (@CustomerID INT, @OfferID INT, @Start DATETIME, @End DATETIME)
 AS
-    IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN 
-        IF @Start < @End BEGIN
-
-
-
-
-
+    IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
+        IF @Start < @End AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty) BEGIN
             DECLARE @employee VARCHAR(11) = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
+
             IF @employee NOT IN (SELECT Pracownik_obsługujący FROM Terminy_oglądania INNER JOIN Wszystkie_oferty ON Terminy_oglądania.ID_oferty = Wszystkie_oferty.ID_oferty WHERE Pracownik_obsługujący = @employee AND (@Start >= Data_zwiedzania_początek AND @End < Data_zwiedzania_koniec) OR @Start < Data_zwiedzania_początek AND @End > Data_zwiedzania_początek) BEGIN
-                IF DATEDIFF(SECOND, @Start, @End) <= 1800 BEGIN
+                IF DATEDIFF(SECOND, @Start, @End) >= 600 AND DATEDIFF(SECOND, @Start, @End) <= 7200 BEGIN
                     INSERT INTO Terminy_oglądania(ID_oferty, ID_oglądającego, Data_zwiedzania_początek, Data_zwiedzania_koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
                     PRINT('SUKCES - zarezerwowano termin oglądania')
                 END
                 ELSE BEGIN
-                    PRINT('BŁĄD - jedna wizyta nie może trwać dłużej niż 30 minut!')
+                    PRINT('BŁĄD - wizyta musi trwać minimalnie 10 minut, a maksymalnie 2 godziny!')
                 END
             END
             ELSE BEGIN
