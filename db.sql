@@ -128,18 +128,6 @@ CREATE TABLE Cechy_nieruchomości (
     FOREIGN KEY (ID_nieruchomości) REFERENCES Nieruchomości(ID_nieruchomości)
 )
 
-CREATE TABLE Terminy_oglądania (
-    ID_terminu INT IDENTITY(1,1) PRIMARY KEY,
-
-    ID_oferty INT NOT NULL,
-    ID_oglądającego VARCHAR(11) NOT NULL,
-    Data_zwiedzania_początek DATETIME NOT NULL,
-    Data_zwiedzania_koniec DATETIME NOT NULL,
-    
-    FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne),
-    FOREIGN KEY (ID_oglądającego) REFERENCES Klienci(ID_klienta),    
-)
-
 CREATE TABLE Wszystkie_oferty (
     ID_oferty INT IDENTITY(1,1) PRIMARY KEY,
 
@@ -170,6 +158,18 @@ CREATE TABLE Sprzedane (
     Mnożnik_ceny FLOAT DEFAULT 1,
 
     FOREIGN KEY (ID_kupującego) REFERENCES Klienci(ID_klienta)
+)
+
+CREATE TABLE Terminy_oglądania (
+    ID_terminu INT IDENTITY(1,1) PRIMARY KEY,
+
+    ID_oferty INT NOT NULL,
+    ID_oglądającego VARCHAR(11) NOT NULL,
+    Data_zwiedzania_początek DATETIME NOT NULL,
+    Data_zwiedzania_koniec DATETIME NOT NULL,
+    
+    FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne),
+    FOREIGN KEY (ID_oglądającego) REFERENCES Klienci(ID_klienta),    
 )
 
 CREATE TABLE Trendy_rynkowe (
