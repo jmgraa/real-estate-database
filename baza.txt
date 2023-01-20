@@ -18,8 +18,12 @@ Spis tabel:
 
 Rzeczy, które mogą być NULLami: Ulica(Nieruchomości), Email, zakończenie+trendu, opis opinii
 
-- usunięcie terminów oglądania dla sprzedanych
-- możliwość zakupu dla rezerwującego
+- usunięcie terminów oglądania dla sprzedanych ZROBIONE
+- brak możliwości rezerwacji i oglądania po terminie ogłoszenia ZROBIONE
+- usunięcie rezerwacji dla sprzedanych ZROBIONE
+- możliwość zakupu dla rezerwującego ZROBIONE
+
+Dobrze by było napisać jednak jakieś przykładowe rezerwacje i terminy oglądania.
 
 Widoki:
 
