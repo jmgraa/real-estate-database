@@ -195,7 +195,7 @@ AS
     EXEC Synchronizuj
 GO
 
-CREATE PROCEDURE ZarezrewujTerminOglądania (@CustomerID INT, @OfferID INT, @Start DATETIME, @End DATETIME)
+CREATE PROCEDURE ZarezerwujTerminOglądania (@CustomerID VARCHAR(11), @OfferID INT, @Start DATETIME, @End DATETIME)
 AS
     IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
         IF @Start < @End AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty) BEGIN
