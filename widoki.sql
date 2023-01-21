@@ -72,9 +72,13 @@ CREATE VIEW Suma_wartości AS
 GO
 
 CREATE VIEW Liczba_terminów_pracowników AS
-	SELECT O.Imię, O.Nazwisko, O.Numer_telefonu, COUNT(Id_terminu) AS [Liczba zarezerwowanych terminów] FROM Osoby O
-	INNER JOIN Pracownicy P ON O.Pesel = P.ID_pracownika
-	LEFT JOIN Terminy_oglądania T ON O.Pesel = T.ID_pracownika
+	SELECT O.Imię, O.Nazwisko, O.Numer_telefonu , COUNT(Id_terminu) AS [Liczba zarezerwowanych terminów] FROM Osoby O
+	INNER JOIN Pracownicy P ON
+	O.Pesel = P.Id_pracownika
+	LEFT JOIN Wszystkie_oferty W ON
+	W.Pracownik_obsługujący = P.ID_pracownika
+	INNER JOIN Terminy_oglądania T ON
+	W.ID_oferty = T.ID_oferty
 	GROUP BY O.Imię, O.Nazwisko, O.Numer_telefonu
 GO
 	
