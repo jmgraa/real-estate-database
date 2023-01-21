@@ -25,8 +25,8 @@ GO
 IF OBJECT_ID('DodajOpinię', 'P') IS NOT NULL
     DROP PROCEDURE DodajOpinię
 GO
-IF OBJECT_ID('ZarezrewujTerminOglądania', 'P') IS NOT NULL
-    DROP PROCEDURE ZarezrewujTerminOglądania
+IF OBJECT_ID('ZarezerwujTerminOglądania', 'P') IS NOT NULL
+    DROP PROCEDURE ZarezerwujTerminOglądania
 GO
 
 CREATE PROCEDURE Synchronizuj
