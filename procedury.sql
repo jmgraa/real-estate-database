@@ -131,7 +131,7 @@ AS
     EXEC Synchronizuj
 GO
 
-CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID INT)
+CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
 AS
     IF (@OfferID IN (SELECT ID_nieruchomości FROM Aktualne INNER JOIN Wszystkie_oferty ON Aktualne.ID_aktualne = Wszystkie_oferty.ID_oferty)) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta = @CustomerID)) BEGIN
         DECLARE @place INT = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
@@ -152,7 +152,7 @@ AS
     EXEC Synchronizuj
 GO
 
-CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID INT, @Start DATETIME, @End DATETIME)
+CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID VARCHAR(11), @Start DATETIME, @End DATETIME)
 AS
     IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
@@ -177,7 +177,7 @@ AS
     EXEC Synchronizuj
 GO
 
-CREATE PROCEDURE DodajOpinię (@CustomerID INT, @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
+CREATE PROCEDURE DodajOpinię (@CustomerID VARCHAR(11), @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
 AS
 	
     IF @Grade > 10 BEGIN
