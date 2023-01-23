@@ -133,14 +133,18 @@ GO
 
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
 AS
-    IF (@OfferID IN (SELECT ID_nieruchomości FROM Aktualne INNER JOIN Wszystkie_oferty ON Aktualne.ID_aktualne = Wszystkie_oferty.ID_oferty)) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID)) BEGIN
+    IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID))) BEGIN
         DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
 
-        DECLARE @mutlplier INT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
+        DECLARE @multiplier FLOAT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
+
+        IF @multiplier IS NULL BEGIN
+            SET @multiplier = 1
+        END
 
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_nieruchomości = @OfferID)
 
-        INSERT INTO Sprzedane VALUES (@EstateID, @CustomerID, GETDATE(), @mutlplier)
+        INSERT INTO Sprzedane VALUES (@EstateID, @CustomerID, GETDATE(), @multiplier)
         DELETE FROM Aktualne WHERE ID_aktualne = @OfferID
 
         PRINT('SUKCES - udało Ci się zakupić tą nieruchmość!')
