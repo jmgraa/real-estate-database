@@ -203,10 +203,10 @@ GO
 CREATE PROCEDURE ZarezerwujTerminOglądania (@CustomerID VARCHAR(11), @OfferID INT, @Start DATETIME, @End DATETIME)
 AS
     IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-        IF @Start < @End AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty) BEGIN
+        IF @Start < @End AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN
             DECLARE @employee VARCHAR(11) = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
-            IF @employee NOT IN (SELECT Pracownik_obsługujący FROM Terminy_oglądania INNER JOIN Wszystkie_oferty ON Terminy_oglądania.ID_oferty = Wszystkie_oferty.ID_oferty WHERE Pracownik_obsługujący = @employee AND (@Start >= Data_zwiedzania_początek AND @End < Data_zwiedzania_koniec) OR @Start < Data_zwiedzania_początek AND @End > Data_zwiedzania_początek) BEGIN
+            IF @employee NOT IN (SELECT Pracownik_obsługujący FROM Terminy_oglądania INNER JOIN Wszystkie_oferty ON Terminy_oglądania.ID_oferty = Wszystkie_oferty.ID_oferty WHERE Pracownik_obsługujący LIKE @employee AND (@Start >= Data_zwiedzania_początek AND @End < Data_zwiedzania_koniec) OR @Start < Data_zwiedzania_początek AND @End > Data_zwiedzania_początek) BEGIN
                 IF DATEDIFF(SECOND, @Start, @End) >= 600 AND DATEDIFF(SECOND, @Start, @End) <= 7200 BEGIN
                     INSERT INTO Terminy_oglądania(ID_oferty, ID_oglądającego, Data_zwiedzania_początek, Data_zwiedzania_koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
                     PRINT('SUKCES - zarezerwowano termin oglądania')
