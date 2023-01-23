@@ -155,39 +155,3 @@ BEGIN
     END
 END
 GO
-
-CREATE TRIGGER UsunięcieTerminówOglądaniaSprzedane
-ON Sprzedane
-AFTER INSERT
-AS
-BEGIN
-    DECLARE @loop_border INT = (SELECT MAX(ID_sprzedane) FROM INSERTED)
-    DECLARE @iterator INT = (SELECT MIN(ID_sprzedane) FROM INSERTED)
-
-    WHILE(@iterator <= @loop_border) BEGIN
-        IF EXISTS(SELECT ID_sprzedane FROM INSERTED WHERE ID_sprzedane = @iterator) BEGIN
-            DELETE FROM Terminy_oglądania WHERE ID_oferty = @iterator
-        END
-
-        SET @iterator = @iterator + 1 
-    END
-END
-GO
-
-CREATE TRIGGER UsunięcieTerminówOglądaniaNiesprzedane
-ON Niesprzedane
-AFTER INSERT
-AS
-BEGIN
-    DECLARE @loop_border INT = (SELECT MAX(ID_niesprzedane) FROM INSERTED)
-    DECLARE @iterator INT = (SELECT MIN(ID_niesprzedane) FROM INSERTED)
-
-    WHILE(@iterator <= @loop_border) BEGIN
-        IF EXISTS(SELECT ID_niesprzedane FROM INSERTED WHERE ID_niesprzedane = @iterator) BEGIN
-            DELETE FROM Terminy_oglądania WHERE ID_oferty = @iterator
-        END
-
-        SET @iterator = @iterator + 1 
-    END
-END
-GO

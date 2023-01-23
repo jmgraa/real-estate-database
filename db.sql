@@ -168,7 +168,7 @@ CREATE TABLE Terminy_oglądania (
     Data_zwiedzania_początek DATETIME NOT NULL,
     Data_zwiedzania_koniec DATETIME NOT NULL,
     
-    FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne),
+    FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne) ON DELETE CASCADE,
     FOREIGN KEY (ID_oglądającego) REFERENCES Klienci(ID_klienta),    
 )
 
@@ -192,7 +192,7 @@ CREATE TABLE Rezerwacje (
     Początek DATETIME NOT NULL,
     Koniec DATETIME NOT NULL,
 
-    FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne),
+    FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne) ON DELETE CASCADE,
     FOREIGN KEY (ID_klienta) REFERENCES Klienci(ID_klienta),
 
     CHECK (Początek < Koniec)

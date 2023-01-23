@@ -91,6 +91,8 @@ AS
             EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
             PRINT('SUKCES - dodano ogłoszenie działki!')
         END
+
+        EXEC Synchronizuj
     END
     ELSE IF @Type_of_estate = 'mieszkanie' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND Numer_mieszkania = @Flat_number) BEGIN
         INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
@@ -99,12 +101,12 @@ AS
 
         EXEC DodajMieszkanie @ID_2, @Flat_number, @Type, @Floor, @HeatingBit, @Lift
         PRINT('SUKCES - dodano ogłoszenie mieszkania!')
+
+        EXEC Synchronizuj
     END
     ELSE BEGIN
         PRINT('BŁĄD - w bazie istnieje już ta nieruchomość lub podałeś zły typ nieruchomości!')
     END
-
-    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @End DATETIME)
@@ -114,6 +116,7 @@ AS
             IF GETDATE() < @End BEGIN
                 INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES (@EstateID, GETDATE(), @End)
                 PRINT('SUKCES - pomyślnie dodano ogłoszenie!')
+                EXEC Synchronizuj
             END
             ELSE BEGIN
                 PRINT('BŁĄD - niewłaściwy przedział czasowy!')
@@ -126,10 +129,9 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - nie istnieje nieruchomość o takim ID!')
     END
-
-    EXEC Synchronizuj
 GO
 
+--DO POPRAWY
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
 AS
     IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID) AND @OfferID NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND @OfferID NOT IN (SELECT ID_niesprzedane FROM Niesprzedane))) BEGIN
@@ -147,14 +149,15 @@ AS
         DELETE FROM Aktualne WHERE ID_aktualne = @OfferID
 
         PRINT('SUKCES - udało Ci się zakupić tą nieruchmość!')
+
+        EXEC Synchronizuj
     END
     ELSE BEGIN
         PRINT('BŁĄD - nieruchomość o podanym ID nie istenieje lub nie jest obecnie dostępna!')
-    END
-
-    EXEC Synchronizuj
+    END  
 GO
 
+--DO POPRAWY
 CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID VARCHAR(11), @End DATETIME)
 AS
     IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
@@ -164,6 +167,8 @@ AS
             IF GETDATE() < @End AND GETDATE() < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN                   
                 INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, GETDATE(), @End)
                 PRINT('SUKCES - pomyślnie dodano rezerwację!')
+
+                EXEC Synchronizuj
             END
             ELSE BEGIN
                 PRINT('BŁĄD - niewłaściwy przedział czasowy!')
@@ -176,8 +181,6 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - nie istnieje ogłoszenie o takim ID!')
     END
-
-    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE DodajOpinię (@CustomerID VARCHAR(11), @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
@@ -190,6 +193,8 @@ AS
         IF (@OfferID NOT IN (SELECT ID_oferty FROM Opinie)) BEGIN
             INSERT INTO Opinie(ID_oferty, Data_wystawienia_opinii, Ocena, Opis) VALUES (@OfferID, GETDATE(), @Grade, @Description)
             PRINT('SUKCES - pomyślnie dodano opinię!')
+
+            EXEC Synchronizuj
         END
         ELSE BEGIN
             PRINT('BŁĄD - zamieściłeś już opinię odnośnie tej nieruchomości!')
@@ -198,8 +203,6 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - klient o podanym ID nie istnieje, nie zakupił żadnej nieruchomości lub tej o podanym ID!')
     END
-
-    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE ZarezerwujTerminOglądania (@CustomerID VARCHAR(11), @OfferID INT, @Start DATETIME, @End DATETIME)
@@ -212,6 +215,8 @@ AS
                 IF DATEDIFF(SECOND, @Start, @End) >= 600 AND DATEDIFF(SECOND, @Start, @End) <= 7200 BEGIN
                     INSERT INTO Terminy_oglądania(ID_oferty, ID_oglądającego, Data_zwiedzania_początek, Data_zwiedzania_koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
                     PRINT('SUKCES - zarezerwowano termin oglądania')
+
+                    EXEC Synchronizuj
                 END
                 ELSE BEGIN
                     PRINT('BŁĄD - wizyta musi trwać minimalnie 10 minut, a maksymalnie 2 godziny!')
@@ -228,6 +233,4 @@ AS
     ELSE BEGIN
         PRINT('BŁĄD - nie istnieje aktualna oferta o podanym ID!')
     END
-
-    EXEC Synchronizuj
 GO
