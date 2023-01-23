@@ -46,6 +46,9 @@ AS
     --dodanie do aktualnych oferty ktorej rezerwacja sie skonczyla i nie jest w aktualnych
     INSERT INTO Aktualne SELECT ID_oferty FROM Rezerwacje WHERE Koniec <= GETDATE() AND (ID_oferty NOT IN (SELECT ID_oferty FROM Aktualne))
 
+    --usuniecie przedawnionej rezerwacji
+    DELETE FROM Rezerwacje WHERE Koniec <= GETDATE()
+
     --usuniecie przedawnionego trendu
     DELETE FROM Trendy_rynkowe WHERE Zakończenie IS NOT NULL AND Zakończenie <= GETDATE()
 
@@ -73,7 +76,7 @@ AS
     VALUES (@ID, @Type, @Electricty, @Gas, @Water, @Sewers)
 GO
 
-CREATE PROCEDURE DodajNieruchomość (@Type_of_estate VARCHAR(MAX), @Street VARCHAR(20), @Number INT, @Place VARCHAR(MAX), @Space INT, @Price INT, @Negotiable BIT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @HeatingType VARCHAR(MAX), @Flat_number INT, @Floor INT, @HeatingBit BIT, @Lift BIT, @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT) 
+CREATE PROCEDURE DodajNieruchomość (@Type_of_estate VARCHAR(MAX), @Street VARCHAR(MAX), @Number INT, @Place VARCHAR(MAX), @Space INT, @Price INT, @Negotiable BIT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @HeatingType VARCHAR(MAX), @Flat_number INT, @Floor INT, @HeatingBit BIT, @Lift BIT, @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT) 
 AS
     IF NOT EXISTS(SELECT ID_nieruchomości FROM Nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space) AND (@Type_of_estate LIKE 'dom' OR @Type_of_estate LIKE 'działka') BEGIN
         INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
@@ -129,7 +132,7 @@ GO
 
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
 AS
-    IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID))) BEGIN
+    IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID) AND @OfferID NOT IN (SELECT ID_sprzedane) AND @OfferID NOT IN (SELECT ID_niesprzedane FROM ))) BEGIN
         DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
 
         DECLARE @multiplier FLOAT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
@@ -152,14 +155,14 @@ AS
     EXEC Synchronizuj
 GO
 
-CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID VARCHAR(11), @Start DATETIME, @End DATETIME)
+CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID VARCHAR(11), @End DATETIME)
 AS
     IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
         IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-            IF @Start < @End AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty) BEGIN                   
-                INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
+            IF GETDATE() < @End AND GETDATE() < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN                   
+                INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, GETDATE(), @End)
                 PRINT('SUKCES - pomyślnie dodano rezerwację!')
             END
             ELSE BEGIN
@@ -220,7 +223,7 @@ AS
             END
         END
         ELSE BEGIN
-            PRINT('BŁĄD - niewłaściwy przedział czasowy')
+            PRINT('BŁĄD - niewłaściwy przedział czasowy lub ogłoszenie w tym czasie może już być nieaktualne!')
         END   
     END
     ELSE BEGIN
