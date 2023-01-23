@@ -132,7 +132,7 @@ GO
 
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
 AS
-    IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID) AND @OfferID NOT IN (SELECT ID_sprzedane) AND @OfferID NOT IN (SELECT ID_niesprzedane FROM ))) BEGIN
+    IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID) AND @OfferID NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND @OfferID NOT IN (SELECT ID_niesprzedane FROM Niesprzedane))) BEGIN
         DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
 
         DECLARE @multiplier FLOAT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
