@@ -75,45 +75,41 @@ GO
 
 CREATE PROCEDURE DodajNieruchomość (@Type_of_estate VARCHAR(MAX), @Street VARCHAR(20), @Number INT, @Place VARCHAR(MAX), @Space INT, @Price INT, @Negotiable BIT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @HeatingType VARCHAR(MAX), @Flat_number INT, @Floor INT, @HeatingBit BIT, @Lift BIT, @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT) 
 AS
-    IF NOT EXISTS(SELECT * FROM Nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space) BEGIN
+    IF NOT EXISTS(SELECT ID_nieruchomości FROM Nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space) AND (@Type_of_estate LIKE 'dom' OR @Type_of_estate LIKE 'działka') BEGIN
         INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
 
         DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
 
         IF @Type_of_estate = 'dom' BEGIN
             EXEC DodajDom @ID, @Type, @Rooms, @Floors, @HeatingType
-            PRINT('Dodano ogłoszenie domu!')
-        END
-        ELSE IF @Type_of_estate = 'mieszkanie' BEGIN
-            EXEC DodajMieszkanie @ID, @Flat_number, @Type, @Floor, @HeatingBit, @Lift
-            PRINT('Dodano ogłoszenie mieszkania!')
+            PRINT('SUKCES - dodano ogłoszenie domu!')
         END
         ELSE IF @Type_of_estate = 'działka' BEGIN
             EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
-            PRINT('Dodano ogłoszenie działki!')
-        END
-        ELSE BEGIN
-            PRINT('BŁĄD - zły typ nieruchomości!')
+            PRINT('SUKCES - dodano ogłoszenie działki!')
         END
     END
     ELSE IF @Type_of_estate = 'mieszkanie' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND Numer_mieszkania = @Flat_number) BEGIN
         INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
-        EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
-        PRINT('Dodano ogłoszenie mieszkania!')
+
+        DECLARE @ID_2 INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
+
+        EXEC DodajMieszkanie @ID_2, @Flat_number, @Type, @Floor, @HeatingBit, @Lift
+        PRINT('SUKCES - dodano ogłoszenie mieszkania!')
     END
     ELSE BEGIN
-        PRINT('BŁĄD - w bazie istnieje już ta nieruchomość!')
+        PRINT('BŁĄD - w bazie istnieje już ta nieruchomość lub podałeś zły typ nieruchomości!')
     END
 
     EXEC Synchronizuj
 GO
 
-CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @Start DATETIME, @End DATETIME)
+CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @End DATETIME)
 AS
     IF @EstateID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
         IF @EstateID NOT IN (SELECT ID_aktualne FROM AKTUALNE) BEGIN
-            IF @Start < @End BEGIN
-                INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES (@EstateID, @Start, @End)
+            IF GETDATE() < @End BEGIN
+                INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES (@EstateID, GETDATE(), @End)
                 PRINT('SUKCES - pomyślnie dodano ogłoszenie!')
             END
             ELSE BEGIN
@@ -185,7 +181,7 @@ CREATE PROCEDURE DodajOpinię (@CustomerID VARCHAR(11), @OfferID INT, @Grade INT
 AS
 	
     IF @Grade > 10 BEGIN
-    	PRINT('Ocena musi być z przedziału 1-10!')
+    	PRINT('BŁĄD - ocena musi być z przedziału 1 - 10!')
  	END
 
     IF @OfferID IN (SELECT ID_sprzedane FROM Sprzedane WHERE ID_kupującego = @CustomerID) BEGIN
