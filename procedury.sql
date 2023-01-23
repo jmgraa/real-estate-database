@@ -183,11 +183,10 @@ GO
 CREATE PROCEDURE DodajOpinię (@CustomerID VARCHAR(11), @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
 AS
 	
-    IF @Grade > 10 BEGIN
+    IF @Grade < 1 OR @Grade > 10 BEGIN
     	PRINT('BŁĄD - ocena musi być z przedziału 1 - 10!')
  	END
-
-    IF @OfferID IN (SELECT ID_sprzedane FROM Sprzedane WHERE ID_kupującego = @CustomerID) BEGIN
+    ELSE IF @OfferID IN (SELECT ID_sprzedane FROM Sprzedane WHERE ID_kupującego = @CustomerID) BEGIN
         IF (@OfferID NOT IN (SELECT ID_oferty FROM Opinie)) BEGIN
             INSERT INTO Opinie(ID_oferty, Data_wystawienia_opinii, Ocena, Opis) VALUES (@OfferID, GETDATE(), @Grade, @Description)
             PRINT('SUKCES - pomyślnie dodano opinię!')
