@@ -40,12 +40,6 @@ AS
     --usunięcie przedawnionych ofert z aktualnych
 	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
 
-    --usuniecie z aktualnych ofert, które są aktualnie zarezerwowane
-    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek <= GETDATE() AND Koniec > GETDATE()) 
-
-    --dodanie do aktualnych oferty ktorej rezerwacja sie skonczyla i nie jest w aktualnych
-    INSERT INTO Aktualne SELECT ID_oferty FROM Rezerwacje WHERE Koniec <= GETDATE() AND (ID_oferty NOT IN (SELECT ID_oferty FROM Aktualne))
-
     --usuniecie przedawnionej rezerwacji
     DELETE FROM Rezerwacje WHERE Koniec <= GETDATE()
 
@@ -123,7 +117,7 @@ AS
             END
         END
         ELSE BEGIN
-            PRINT('BŁĄD - istnieje już  aktualne ogłoszenie dla tej nieruchomości!')
+            PRINT('BŁĄD - istnieje już aktualne ogłoszenie dla tej nieruchomości!')
         END
     END
     ELSE BEGIN
@@ -131,10 +125,9 @@ AS
     END
 GO
 
---DO POPRAWY
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
 AS
-    IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID) AND @OfferID NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND @OfferID NOT IN (SELECT ID_niesprzedane FROM Niesprzedane))) BEGIN
+    IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) AND ((@OfferID NOT IN (SELECT ID_oferty FROM Rezerwacje) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID))))) BEGIN
         DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
 
         DECLARE @multiplier FLOAT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
@@ -157,7 +150,6 @@ AS
     END  
 GO
 
---DO POPRAWY
 CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID VARCHAR(11), @End DATETIME)
 AS
     IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
