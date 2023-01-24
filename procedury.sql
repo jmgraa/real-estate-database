@@ -78,7 +78,7 @@ AS
     IF @Type_of_estate IS NOT NULL AND @Street IS NOT NULL AND @Number IS NOT NULL AND @Place IS NOT NULL AND @Space IS NOT NULL AND @Price IS NOT NULL AND @Negotiable IS NOT NULL AND @Type IS NOT NULL BEGIN
         IF NOT EXISTS(SELECT ID_nieruchomości FROM Nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space) AND (@Type_of_estate LIKE 'dom' OR @Type_of_estate LIKE 'działka') BEGIN
             IF @Type_of_estate = 'dom' BEGIN
-                IF @ID IS NOT NULL AND @Type IS NOT NULL AND @Rooms IS NOT NULL AND @Floors IS NOT NULL AND @HeatingType IS NOT NULL BEGIN
+                IF @Type IS NOT NULL AND @Rooms IS NOT NULL AND @Floors IS NOT NULL AND @HeatingType IS NOT NULL BEGIN
                     INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
                     DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
                     EXEC DodajDom @ID, @Type, @Rooms, @Floors, @HeatingType
@@ -88,7 +88,7 @@ AS
                 END
             END
             ELSE IF @Type_of_estate = 'działka' BEGIN
-                IF @ID IS NOT NULL AND @Type IS NOT NULL AND @Electricty IS NOT NULL AND @Gas IS NOT NULL AND @Water IS NOT NULL AND @Sewers IS NOT NULL BEGIN
+                IF @Type IS NOT NULL AND @Electricty IS NOT NULL AND @Gas IS NOT NULL AND @Water IS NOT NULL AND @Sewers IS NOT NULL BEGIN
                     INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
                     DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
                     EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
@@ -99,7 +99,7 @@ AS
             END
         END
         ELSE IF @Type_of_estate = 'mieszkanie' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND @Flat_number IS NOT NULL AND Numer_mieszkania = @Flat_number) BEGIN
-            IF @ID_2 IS NOT NULL AND @Flat_number IS NOT NULL AND @Type IS NOT NULL AND @Floor IS NOT NULL AND @HeatingBit IS NOT NULL AND @Lift IS NOT NULL BEGIN
+            IF @Flat_number IS NOT NULL AND @Type IS NOT NULL AND @Floor IS NOT NULL AND @HeatingBit IS NOT NULL AND @Lift IS NOT NULL BEGIN
                 INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
                 DECLARE @ID_2 INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
                 EXEC DodajMieszkanie @ID_2, @Flat_number, @Type, @Floor, @HeatingBit, @Lift
