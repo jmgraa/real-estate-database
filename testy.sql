@@ -42,6 +42,9 @@ EXEC ZarezerwujTerminOglądania '08230862902', 3,  '2024-03-01 12:00:00', '2024-
 EXEC ZarezerwujTerminOglądania '20082281942',1000,'2023-05-01 15:00', '2023-05-01 16:00'
 --Rezerwacja na nieistniejaca oferete
 
+EXEC ZarezerwujTerminOglądania '20082281942',20,'2022-05-01 15:00', '2022-05-01 16:00'
+--Zly termin rezerwacji
+
 EXEC Rezerwacja 1,'40071541277','2023-05-01' 
 --Poprawne dodanie rezerwacji
 
