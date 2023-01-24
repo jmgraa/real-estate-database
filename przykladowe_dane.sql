@@ -352,6 +352,7 @@ INSERT INTO Cechy_nieruchomości VALUES
 (49, 'schowek na narzędzia'),
 (49, 'infrastruktura drogowa')
 
+EXEC Synchronizuj
 
 EXEC Rezerwacja 6,'71011658432','2023-04-11'
 EXEC Rezerwacja 22,'31072069990','2023-05-01'
