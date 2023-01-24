@@ -54,58 +54,76 @@ GO
 
 CREATE PROCEDURE DodajDom (@ID INT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @Heating VARCHAR(MAX))
 AS
-    INSERT INTO Domy
-    VALUES (@ID, @Type, @Rooms, @Floors, @Heating)
+    INSERT INTO Domy VALUES (@ID, @Type, @Rooms, @Floors, @Heating)
+    PRINT('SUKCES - dodano ogłoszenie domu!')
+    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE DodajMieszkanie (@ID INT, @Flat_number INT, @Type VARCHAR(MAX), @Floor INT, @Heating BIT, @Lift BIT)
 AS
-    INSERT INTO Mieszkania
-    VALUES (@ID, @Flat_number, @Type, @Floor, @Heating, @Lift)
+    INSERT INTO Mieszkania VALUES (@ID, @Flat_number, @Type, @Floor, @Heating, @Lift)
+    PRINT('SUKCES - dodano ogłoszenie mieszkania!')
+    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE DodajDziałkę (@ID INT, @Type VARCHAR(MAX), @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT)
 AS
-    INSERT INTO Działki
-    VALUES (@ID, @Type, @Electricty, @Gas, @Water, @Sewers)
+    INSERT INTO Działki VALUES (@ID, @Type, @Electricty, @Gas, @Water, @Sewers)
+    PRINT('SUKCES - dodano ogłoszenie działki!')
+    EXEC Synchronizuj
 GO
 
 CREATE PROCEDURE DodajNieruchomość (@Type_of_estate VARCHAR(MAX), @Street VARCHAR(MAX), @Number INT, @Place VARCHAR(MAX), @Space INT, @Price INT, @Negotiable BIT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @HeatingType VARCHAR(MAX), @Flat_number INT, @Floor INT, @HeatingBit BIT, @Lift BIT, @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT) 
 AS
-    IF NOT EXISTS(SELECT ID_nieruchomości FROM Nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space) AND (@Type_of_estate LIKE 'dom' OR @Type_of_estate LIKE 'działka') BEGIN
-        INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+    IF @Type_of_estate IS NOT NULL AND @Street IS NOT NULL AND @Number IS NOT NULL AND @Place IS NOT NULL AND @Space IS NOT NULL AND @Price IS NOT NULL AND @Negotiable IS NOT NULL AND @Type IS NOT NULL BEGIN
+        IF NOT EXISTS(SELECT ID_nieruchomości FROM Nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space) AND (@Type_of_estate LIKE 'dom' OR @Type_of_estate LIKE 'działka') BEGIN
+            DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
 
-        DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
-
-        IF @Type_of_estate = 'dom' BEGIN
-            EXEC DodajDom @ID, @Type, @Rooms, @Floors, @HeatingType
-            PRINT('SUKCES - dodano ogłoszenie domu!')
+            IF @Type_of_estate = 'dom' BEGIN
+                IF @ID IS NOT NULL AND @Type IS NOT NULL AND @Rooms IS NOT NULL AND @Floors IS NOT NULL AND @HeatingType IS NOT NULL BEGIN
+                    INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+                    EXEC DodajDom @ID, @Type, @Rooms, @Floors, @HeatingType
+                END
+                ELSE BEGIN
+                    PRINT('BŁĄD - niepełne dane!')
+                END
+            END
+            ELSE IF @Type_of_estate = 'działka' BEGIN
+                IF @ID IS NOT NULL AND @Type IS NOT NULL AND @Electricty IS NOT NULL AND @Gas IS NOT NULL AND @Water IS NOT NULL AND @Sewers IS NOT NULL BEGIN
+                    INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+                    EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
+                END
+                ELSE BEGIN
+                    PRINT('BŁĄD - niepełne dane!')
+                END
+            END
         END
-        ELSE IF @Type_of_estate = 'działka' BEGIN
-            EXEC DodajDziałkę @ID, @Type, @Electricty, @Gas, @Water, @Sewers
-            PRINT('SUKCES - dodano ogłoszenie działki!')
+        ELSE IF @Type_of_estate = 'mieszkanie' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND @Flat_number IS NOT NULL AND Numer_mieszkania = @Flat_number) BEGIN
+            DECLARE @ID_2 INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
+
+            IF @ID_2 IS NOT NULL AND @Flat_number IS NOT NULL AND @Type IS NOT NULL AND @Floor IS NOT NULL AND @HeatingBit IS NOT NULL AND @Lift IS NOT NULL BEGIN
+                INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+                EXEC DodajMieszkanie @ID_2, @Flat_number, @Type, @Floor, @HeatingBit, @Lift
+            END
+            ELSE BEGIN
+                PRINT('BŁĄD - niepełne dane!')
+            END            
         END
-
-        EXEC Synchronizuj
-    END
-    ELSE IF @Type_of_estate = 'mieszkanie' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND Numer_mieszkania = @Flat_number) BEGIN
-        INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
-
-        DECLARE @ID_2 INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
-
-        EXEC DodajMieszkanie @ID_2, @Flat_number, @Type, @Floor, @HeatingBit, @Lift
-        PRINT('SUKCES - dodano ogłoszenie mieszkania!')
-
-        EXEC Synchronizuj
+        ELSE BEGIN
+            PRINT('BŁĄD - w bazie istnieje już ta nieruchomość lub podałeś zły typ nieruchomości!')
+        END
     END
     ELSE BEGIN
-        PRINT('BŁĄD - w bazie istnieje już ta nieruchomość lub podałeś zły typ nieruchomości!')
-    END
+        PRINT('BŁĄD - niepełne dane!')
+    END   
 GO
 
 CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @End DATETIME)
 AS
-    IF @EstateID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
+    IF @EstateID IS NULL OR @End IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF @EstateID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
         IF @EstateID NOT IN (SELECT ID_aktualne FROM AKTUALNE) BEGIN
             IF GETDATE() < @End BEGIN
                 INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES (@EstateID, GETDATE(), @End)
@@ -127,7 +145,10 @@ GO
 
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
 AS
-    IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) AND ((@OfferID NOT IN (SELECT ID_oferty FROM Rezerwacje) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID))))) BEGIN
+    IF @OfferID IS NULL OR @CustomerID IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) AND ((@OfferID NOT IN (SELECT ID_oferty FROM Rezerwacje) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID))))) BEGIN
         DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
 
         DECLARE @multiplier FLOAT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
@@ -152,7 +173,10 @@ GO
 
 CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID VARCHAR(11), @End DATETIME)
 AS
-    IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
+    IF @OfferID IS NULL OR @CustomerID IS NULL OR @End IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
         IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
@@ -177,7 +201,10 @@ GO
 
 CREATE PROCEDURE DodajOpinię (@CustomerID VARCHAR(11), @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
 AS
-    IF @Grade < 1 OR @Grade > 10 BEGIN
+    IF @CustomerID IS NULL OR @OfferID IS NULL OR @Grade IS NULL OR @Description IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF @Grade < 1 OR @Grade > 10 BEGIN
     	PRINT('BŁĄD - ocena musi być z przedziału 1 - 10!')
  	END
     ELSE IF @OfferID IN (SELECT ID_sprzedane FROM Sprzedane WHERE ID_kupującego = @CustomerID) BEGIN
@@ -198,7 +225,10 @@ GO
 
 CREATE PROCEDURE ZarezerwujTerminOglądania (@CustomerID VARCHAR(11), @OfferID INT, @Start DATETIME, @End DATETIME)
 AS
-    IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
+    IF @CustomerID IS NULL OR @OfferID IS NULL OR @Start IS NULL OR @End IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
         IF @Start < @End AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN
             DECLARE @employee VARCHAR(11) = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
