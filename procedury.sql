@@ -177,7 +177,6 @@ GO
 
 CREATE PROCEDURE DodajOpinię (@CustomerID VARCHAR(11), @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
 AS
-	
     IF @Grade < 1 OR @Grade > 10 BEGIN
     	PRINT('BŁĄD - ocena musi być z przedziału 1 - 10!')
  	END
