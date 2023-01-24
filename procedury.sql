@@ -234,7 +234,7 @@ AS
         PRINT('BŁĄD - niepełne dane!')
     END
     ELSE IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-        IF @Start < @End AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN
+        IF @Start < @End AND @Start >= GETDATE() AND @End > GETDATE() AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN
             DECLARE @employee VARCHAR(11) = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
             IF @employee NOT IN (SELECT Pracownik_obsługujący FROM Terminy_oglądania INNER JOIN Wszystkie_oferty ON Terminy_oglądania.ID_oferty = Wszystkie_oferty.ID_oferty WHERE Pracownik_obsługujący LIKE @employee AND (@Start >= Data_zwiedzania_początek OR @End > Data_zwiedzania_początek) AND (@Start < Data_zwiedzania_koniec OR @End <= Data_zwiedzania_koniec)) BEGIN
