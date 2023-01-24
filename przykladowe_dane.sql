@@ -351,3 +351,16 @@ INSERT INTO Cechy_nieruchomości VALUES
 (43, 'wjazd na działkę'),
 (49, 'schowek na narzędzia'),
 (49, 'infrastruktura drogowa')
+
+
+EXEC Rezerwacja 6,'71011658432','2023-04-11'
+EXEC Rezerwacja 22,'31072069990','2023-05-01'
+EXEC Rezerwacja 34,'93011904788','2023-04-28'
+EXEC Rezerwacja 39,'93122104693','2023-03-15'
+EXEC Rezerwacja 43,'71011658432','2023-05-17'
+
+EXEC ZarezerwujTerminOglądania '20082281942',20,'2022-02-25 12:00','2022-02-25 12:15'
+EXEC ZarezerwujTerminOglądania '35020376651',34,'2022-03-10 16:00','2022-03-10 17:00'
+EXEC ZarezerwujTerminOglądania '86072900736',42,'2022-03-02 13:00','2022-03-02 13:30'
+EXEC ZarezerwujTerminOglądania '93122104693',49,'2022-04-01 14:00','2022-04-01 14:20'
+EXEC ZarezerwujTerminOglądania '50021223412',10,'2022-04-10 23:30','2022-04-10 23:59'
