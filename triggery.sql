@@ -13,12 +13,6 @@ GO
 IF OBJECT_ID('ZwolnieniePracownikaNiesprzedane', 'TR') IS NOT NULL
     DROP TRIGGER ZwolnieniePracownikaNiesprzedane
 GO
-IF OBJECT_ID('UsunięcieTerminówOglądaniaSprzedane', 'TR') IS NOT NULL
-    DROP TRIGGER UsunięcieTerminówOglądaniaSprzedane
-GO
-IF OBJECT_ID('UsunięcieTerminówOglądaniaNiesprzedane', 'TR') IS NOT NULL
-    DROP TRIGGER UsunięcieTerminówOglądaniaNiesprzedane
-GO
 
 CREATE TRIGGER DodanieTrendu
 ON Trendy_rynkowe
