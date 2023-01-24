@@ -25,8 +25,8 @@ EXEC DodajOgłoszenie 55,'2023-02-01'
 
 
 
-EXEC ZarezerwujTerminOglądania '08230862902', 52,  '2023-03-01 16:00:30', '2023-03-01 17:00:00'
-EXEC ZarezerwujTerminOglądania '20082281942', 52,  '2023-03-01 16:50:30', '2023-03-01 18:00:00'
+EXEC ZarezerwujTerminOglądania '08230862902', 51,  '2023-03-01 16:00:30', '2023-03-01 17:00:00'
+EXEC ZarezerwujTerminOglądania '20082281942', 51,  '2023-03-01 16:50:30', '2023-03-01 18:00:00'
 /*/ Dodanie terminu w którym pracownik jest zajęty */
 
 
