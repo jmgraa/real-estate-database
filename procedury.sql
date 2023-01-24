@@ -179,11 +179,15 @@ AS
         DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
 
         IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-            IF GETDATE() < @End AND GETDATE() < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN                   
-                INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, GETDATE(), @End)
-                PRINT('SUKCES - pomyślnie dodano rezerwację!')
-
-                EXEC Synchronizuj
+            IF GETDATE() < @End AND GETDATE() < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN 
+                IF NOT EXISTS(SELECT ID_rezerwacji FROM Rezerwacje WHERE Początek <= GETDATE() AND Koniec > GETDATE()) BEGIN
+                    INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, GETDATE(), @End)
+                    PRINT('SUKCES - pomyślnie dodano rezerwację!')
+                    EXEC Synchronizuj
+                END
+                ELSE BEGIN
+                    PRINT('BŁĄD - ta nieruchomość jest obecnie zarezerwowana!')
+                END
             END
             ELSE BEGIN
                 PRINT('BŁĄD - niewłaściwy przedział czasowy!')
