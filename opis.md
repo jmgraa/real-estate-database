@@ -13,8 +13,11 @@ Baza danych zawiera informacje o ofertach nieruchomości, takie jak typ nierucho
 ???
 
 # Diagram ER
-Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabelami w bazie oraz skład wszystkich tabel tj. nazwy i typy tych danych.
+Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabelami w bazie.
 ![DiagramER](diagram.png)
+
+# Schemat bazy danych
+![SchematBazyDanych](schemat.png)
 
 # Tabele
 - Nieruchomości
@@ -44,6 +47,14 @@ CREATE VIEW Ranking_pracowników AS
 	INNER JOIN Pracownicy P ON W.Pracownik_obsługujący = P.ID_pracownika
 	INNER JOIN Osoby Os ON Os.Pesel = P.ID_pracownika
 	GROUP BY P.ID_pracownika,Os.Imię, Os.Nazwisko
+GO
+```
+
+Liczba ofert wystawionych w danym miesiącu
+```tsql
+CREATE VIEW Liczba_ofert_w_miesiącu AS
+	SELECT MONTH(Data_wystawienia) AS [Numer miesiąca], COUNT(MONTH(Data_wystawienia)) AS [Liczba ofert w miesiącu] FROM Wszystkie_oferty
+	GROUP BY MONTH(Data_wystawienia)
 GO
 ```
 
@@ -90,7 +101,7 @@ CREATE VIEW Pracownik_aktualne AS
 	LEFT JOIN
 	Aktualne A ON
 	W.ID_oferty = A.ID_aktualne
-GROUP BY O.Pesel
+    GROUP BY O.Pesel
 GO
 ```
 
@@ -103,7 +114,7 @@ CREATE VIEW Pracownik_sprzedane AS
 	LEFT JOIN
 	Sprzedane S ON
 	W.ID_oferty = S.ID_sprzedane
-GROUP BY O.Pesel
+    GROUP BY O.Pesel
 GO
 ```
 
@@ -116,7 +127,7 @@ CREATE VIEW Pracownik_niesprzedane AS
 	LEFT JOIN
 	Niesprzedane N ON
 	W.ID_oferty = N.ID_niesprzedane
-GROUP BY O.Pesel
+    GROUP BY O.Pesel
 GO
 ```
 
@@ -132,124 +143,198 @@ CREATE VIEW Pracownik_statystyki AS
 	Pn.Pesel = O.Pesel
 GO
 ```
+
 # Funkcje
 
+Nieruchomości znajdujące się w danym mieście
+```tsql
+CREATE FUNCTION Aktualne_z_miasta(@x VARCHAR(MAX))
+RETURNS TABLE
+AS
+RETURN
+    SELECT * FROM Nieruchomości N
+	LEFT JOIN Aktualne A ON	N.ID_nieruchomości = A.ID_aktualne
+	WHERE N.Miejscowość = @x;
+GO
+```
+
+Nieruchomości danego typu
+```tsql
+CREATE FUNCTION Oferty_typu(@x VARCHAR(MAX))
+RETURNS @result TABLE (ID_nieruchomosci int, Ulica VARCHAR(MAX), Numer int,Miejscowość VARCHAR(MAX),Powierzchnia INT,Cena INT, Możliwość_negocjacji_ceny BIT)
+AS
+BEGIN
+	IF @x = 'Domy' BEGIN
+		INSERT INTO @result
+		SELECT N.ID_nieruchomości, N.Ulica, N.Numer, N.Miejscowość, N.Powierzchnia, N.Cena, N.Możliwość_negocjacji_ceny FROM Domy
+		LEFT JOIN Nieruchomości N ON
+		ID_domu = N.ID_nieruchomości
+	END
+	ELSE IF @x = 'Działki' BEGIN
+		INSERT INTO @result
+		SELECT N.ID_nieruchomości, N.Ulica, N.Numer, N.Miejscowość, N.Powierzchnia, N.Cena, N.Możliwość_negocjacji_ceny FROM Działki
+		LEFT JOIN Nieruchomości N ON
+		ID_działki = N.ID_nieruchomości
+	END
+	ELSE IF @x = 'Mieszkania' BEGIN
+		INSERT INTO @result
+		SELECT N.ID_nieruchomości, N.Ulica, N.Numer, N.Miejscowość, N.Powierzchnia, N.Cena, N.Możliwość_negocjacji_ceny FROM Mieszkania
+		LEFT JOIN Nieruchomości N ON ID_mieszkania = N.ID_nieruchomości
+	END
+	ELSE BEGIN
+		INSERT INTO @result SELECT NULL, NULL, NULL, NULL, NULL, NULL, NULL
+	END
+	RETURN
+END
+GO
+```
+
+Oferty w danym przedziale cenowym
+```tsql
+CREATE FUNCTION Oferty_od_do(@a INT, @b INT)
+RETURNS TABLE
+AS
+RETURN
+	SELECT * FROM Nieruchomości WHERE Nieruchomości.Cena >= @a AND Nieruchomości.Cena <= @b;
+GO
+```
+
+Wyswietlenie wszystkich informacji odnośnie nieruchomości z danej oferty 
+CREATE FUNCTION Info_oferta(@x INT)
+RETURNS TABLE
+AS
+RETURN 
+	SELECT 
+	W.Pracownik_obsługujący, W.Data_wystawienia, W.Data_zakończenia, N.Ulica, N.Numer,N.Miejscowość,N.Powierzchnia, N.Cena,N.Możliwość_negocjacji_ceny FROM Wszystkie_oferty W INNER JOIN
+	Nieruchomości N ON
+	W.ID_nieruchomości = N.ID_nieruchomości
+	WHERE W.ID_nieruchomości = @x
+GO
 
 ## Użycie funkcji
 
 
-# Procedury Składowane
+# Procedury składowane
+
 Poniższa procedura synchronizuje wszystkie tabele w bazie, których zawartość jest zależna od czasu. W prawdziwej bazie, data byłaby sprawdzana automatycznie w każdym momencie. Na potrzeby naszego projektu istnieje procedura.
 ```tsql
 CREATE PROCEDURE Synchronizuj
 AS
-    --dodanie do aktualnych oferty, która jeszcze się nie przedawniła, nie została sprzedana oraz nie jest już w aktualnych
+    SET NOCOUNT ON
+
+    --dodanie do aktualnych oferty tych, które jeszcze się nie przedawniły, nie zostały sprzedana oraz nie są już w aktualnych
     INSERT INTO Aktualne SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_aktualne FROM Aktualne) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia > GETDATE()
 
     --dodanie do niesprzedanych ofert tych, które przedawniły się i nie są one już w niesprzedanych lub w sprzedancyh
     INSERT INTO Niesprzedane SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_niesprzedane FROM Niesprzedane) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia <= GETDATE()
 
-    --usunięcie przedawnionej oferty
+    --usunięcie przedawnionych ofert z aktualnych
 	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
 
-    --usuniecie z aktualnych oferty, ktora jest aktualnie zarezerwowana
-    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_oferty FROM Rezerwacje WHERE Początek <= GETDATE() AND Koniec > GETDATE()) 
-
-    --dodanie do aktualnych oferty ktorej rezerwacja sie skonczyla i nie jest w aktualnych
-    INSERT INTO Aktualne SELECT ID_oferty FROM Rezerwacje WHERE Koniec <= GETDATE() AND (ID_oferty NOT IN (SELECT ID_oferty FROM Aktualne))
+    --usuniecie przedawnionej rezerwacji
+    DELETE FROM Rezerwacje WHERE Koniec <= GETDATE()
 
     --usuniecie przedawnionego trendu
     DELETE FROM Trendy_rynkowe WHERE Zakończenie IS NOT NULL AND Zakończenie <= GETDATE()
 
+    --usuniecie przedawnionego terminu oglądania
+    DELETE FROM Terminy_oglądania WHERE Data_zwiedzania_koniec <= GETDATE()
+
     PRINT('SUKCES - synchronizacja przebiegła pomyślnie!')
 GO
 ```
+
 Poniższe cztery procedury odpowiadają za dodanie konkretnej nieruchomości do bazy. W interfejsie graficznym wyglądałoby to tak, że po wybraniu typu nieruchomości, pojawiają się kolejne okienka z moliwościa wprowadzenia odpowiednej informacji. W naszym przypadku będziemy przekazywali do procedury odpowiednie informacje, a pozostałe pola wypełnimy NULLami.
 ```tsql
-CREATE PROCEDURE DodajDom @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @Heating VARCHAR(MAX)
+CREATE PROCEDURE DodajDom (@ID INT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @Heating VARCHAR(MAX))
 AS
-    INSERT INTO Domy
-    VALUES (@Type, @Rooms, @Floors, @Heating)
+    INSERT INTO Domy VALUES (@ID, @Type, @Rooms, @Floors, @Heating)
+    PRINT('SUKCES - dodano ogłoszenie domu!')
+    EXEC Synchronizuj
 GO
 ```
 ```tsql
-CREATE PROCEDURE DodajMieszkanie @Type VARCHAR(MAX), @Floor INT, @Heating BIT, @Lift BIT
+CREATE PROCEDURE DodajMieszkanie (@ID INT, @Flat_number INT, @Type VARCHAR(MAX), @Floor INT, @Heating BIT, @Lift BIT)
 AS
-    INSERT INTO Mieszkania
-    VALUES (@Type, @Floor, @Heating, @Lift)
+    INSERT INTO Mieszkania VALUES (@ID, @Flat_number, @Type, @Floor, @Heating, @Lift)
+    PRINT('SUKCES - dodano ogłoszenie mieszkania!')
+    EXEC Synchronizuj
 GO
 ```
 ```tsql
-CREATE PROCEDURE DodajDziałkę @Type VARCHAR(MAX), @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT
+CREATE PROCEDURE DodajDziałkę (@ID INT, @Type VARCHAR(MAX), @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT)
 AS
-    INSERT INTO Działki
-    VALUES (@Type, @Electricty, @Gas, @Water, @Sewers)
+    INSERT INTO Działki VALUES (@ID, @Type, @Electricty, @Gas, @Water, @Sewers)
+    PRINT('SUKCES - dodano ogłoszenie działki!')
+    EXEC Synchronizuj
 GO
 ```
 ```tsql
-CREATE PROCEDURE DodajNieruchomość (@Type_of_estate VARCHAR(MAX), @Street VARCHAR(20), @Number INT, @Place VARCHAR(MAX), @Space INT, @Price INT, @Negotiable BIT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @Heating VARCHAR(MAX), @Floor INT, @Flat_heating BIT, @Lift BIT, @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT) 
+CREATE PROCEDURE DodajNieruchomość (@Type_of_estate VARCHAR(MAX), @Street VARCHAR(MAX), @Number INT, @Place VARCHAR(MAX), @Space INT, @Price INT, @Negotiable BIT, @Type VARCHAR(MAX), @Rooms INT, @Floors INT, @HeatingType VARCHAR(MAX), @Flat_number INT, @Floor INT, @HeatingBit BIT, @Lift BIT, @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT) 
 AS
-    INSERT INTO Nieruchomości VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
-
-    IF @Type_of_estate = 'dom' BEGIN
-        EXEC DodajDom @Type,  @Rooms, @Floors, @Heating
-        PRINT('Dodano ogłoszenie domu!')
-    END
-    ELSE IF @Type_of_estate = 'mieszkanie' BEGIN
-        EXEC DodajMieszkanie @Type VARCHAR(MAX), @Floor INT, @Heating BIT, @Lift BIT
-        PRINT('Dodano ogłoszenie mieszkania!')
-    END
-    ELSE IF @Type_of_estate = 'działka' BEGIN
-        EXEC DodajDziałkę Type VARCHAR(MAX), @Electricty BIT, @Gas BIT, @Water BIT, @Sewers BIT
-        PRINT('Dodano ogłoszenie działki!')
-    END
-    ELSE BEGIN
-        PRINT('BŁĄD - zły typ nieruchomości!')
-    END
-GO
-```
-Poniższa procedura pozwala zakupić nieruchmość z ogłoszenia.
-```tsql
-CREATE PROCEDURE ZakupNieruchomości @OfferID INT, @ClientID INT
-AS
-    IF @OfferID IN (SELECT ID_aktualne FROM Wszystkie_oferty) BEGIN
-        @place = SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID
-        @mnoznik = SELECT Sum(Zmiana_mnożnika) FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE()
-
-        INSERT INTO Sprzedane VALUES (@EstateID, @ClientID, GETDATE(), @mnoznik)
-        DELETE FROM Aktualne WHERE ID_aktualne = @OfferID
-    END
-    ELSE BEGIN
-        PRINT('BŁĄD - nieruchomość o podanym ID nie istenieje lub nie jest obecnie dostępna!')
-    END
-GO
-```
-Poniższa procedura pozwala zarezerwować na jakiś okres nieruchmość, aby była ona niedostępna dla innych klientów.
-```tsql
-CREATE PROCEDURE Rezerwacja @OfferID INT, @CustomerID INT, @Begin DATETIME, @End DATETIME
-AS
-    IF @OfferID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
-        IF @OfferID NOT IN (SELECT ID_rezerwacji FROM Rezerwacje) BEGIN
-            IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
-                IF @Begin < @End BEGIN                    
-                    @pracownik = SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID
-                    IF @pracownik IN (SELECT Pracownik_obsługujący FROM Rezerwacje INNER JOIN Wszystkie_oferty ON Rezerwacje.ID_oferty = Wszystkie_oferty.ID_oferty WHERE (@Begin < Początek AND @End < Początek) OR (@Begin > Początek AND @End > Koniec) BEGIN
-                        INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, @Begin, @End)
-                    END
-                    ELSE BEGIN
-                        PRINT('BŁĄD - pracownik obsługujący ogłosznie jest w danym terminie zajęty!')
-                    END
+    IF @Type_of_estate IS NOT NULL AND @Street IS NOT NULL AND @Number IS NOT NULL AND @Place IS NOT NULL AND @Space IS NOT NULL AND @Price IS NOT NULL AND @Negotiable IS NOT NULL AND @Type IS NOT NULL BEGIN
+        IF NOT EXISTS(SELECT ID_nieruchomości FROM Nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space) AND (@Type_of_estate LIKE 'dom' OR @Type_of_estate LIKE 'działka') BEGIN
+            IF @Type_of_estate = 'dom' BEGIN
+                IF @Type IS NOT NULL AND @Rooms IS NOT NULL AND @Floors IS NOT NULL AND @HeatingType IS NOT NULL BEGIN
+                    INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+                    DECLARE @ID INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
+                    EXEC DodajDom @ID, @Type, @Rooms, @Floors, @HeatingType
                 END
                 ELSE BEGIN
-                    PRINT('BŁĄD - niewłaściwy przedział czasowy rezerwacji!')
+                    PRINT('BŁĄD - niepełne dane!')
                 END
             END
+            ELSE IF @Type_of_estate = 'działka' BEGIN
+                IF @Type IS NOT NULL AND @Electricty IS NOT NULL AND @Gas IS NOT NULL AND @Water IS NOT NULL AND @Sewers IS NOT NULL BEGIN
+                    INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+                    DECLARE @ID_2 INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
+                    EXEC DodajDziałkę @ID_2, @Type, @Electricty, @Gas, @Water, @Sewers
+                END
+                ELSE BEGIN
+                    PRINT('BŁĄD - niepełne dane!')
+                END
+            END
+        END
+        ELSE IF @Type_of_estate = 'mieszkanie' AND NOT EXISTS(SELECT * FROM Mieszkania INNER JOIN Nieruchomości ON Mieszkania.ID_mieszkania = Nieruchomości.ID_nieruchomości WHERE Ulica = @Street AND Numer = @Number AND Miejscowość = @Place AND Powierzchnia = @Space AND @Flat_number IS NOT NULL AND Numer_mieszkania = @Flat_number) BEGIN
+            IF @Flat_number IS NOT NULL AND @Type IS NOT NULL AND @Floor IS NOT NULL AND @HeatingBit IS NOT NULL AND @Lift IS NOT NULL BEGIN
+                INSERT INTO Nieruchomości(Ulica, Numer, Miejscowość, Powierzchnia, Cena, Możliwość_negocjacji_ceny) VALUES (@Street, @Number, @Place, @Space, @Price, @Negotiable)
+                DECLARE @ID_3 INT = (SELECT TOP 1 ID_nieruchomości FROM Nieruchomości ORDER BY ID_nieruchomości DESC)
+                EXEC DodajMieszkanie @ID_3, @Flat_number, @Type, @Floor, @HeatingBit, @Lift
+            END
             ELSE BEGIN
-                PRINT('BŁĄD - to ogłosznie nie jest już aktualne!')
+                PRINT('BŁĄD - niepełne dane!')
+            END            
+        END
+        ELSE BEGIN
+            PRINT('BŁĄD - w bazie istnieje już ta nieruchomość lub podałeś zły typ nieruchomości!')
+        END
+    END
+    ELSE BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END   
+GO
+```
+
+Dodanie ogłoszenia
+```tsql
+CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @End DATETIME)
+AS
+    IF @EstateID IS NULL OR @End IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF @EstateID IN (SELECT ID_nieruchomości FROM Nieruchomości) BEGIN
+        IF @EstateID NOT IN (SELECT ID_aktualne FROM AKTUALNE) BEGIN
+            IF GETDATE() < @End BEGIN
+                INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończenia) VALUES (@EstateID, GETDATE(), @End)
+                PRINT('SUKCES - pomyślnie dodano ogłoszenie!')
+                EXEC Synchronizuj
+            END
+            ELSE BEGIN
+                PRINT('BŁĄD - niewłaściwy przedział czasowy!')
             END
         END
         ELSE BEGIN
-            PRINT('BŁĄD - ta nieruchomość jest już zarezerwowana - proszę spróbować później!')
+            PRINT('BŁĄD - istnieje już aktualne ogłoszenie dla tej nieruchomości!')
         END
     END
     ELSE BEGIN
@@ -258,104 +343,286 @@ AS
 GO
 ```
 
-## Wykonywanie Procedur
-Dodanie do bazy mieszkania w apartamentowcu na ósmym piętrze, znajdującego się na ulicy Krakowskiej 15 w Tarnowie. Mieszkanie ma 60m^2 i kosztuje 950 tysięcy złotych. Nie ma możliwości negocjacji ceny. W budynku, w którym znajduje się mieszakanie jest winda oraz jest ono ogrzewane z sieci.
+Zakup nieruchomości z danej oferty
 ```tsql
-EXEC DodajNieruchomość ('mieszkanie', 'Krakowska', '15', 'Tarnów', 60, 950000, 0, 'apartamentowiec', NULL, NULL, NULL, 8, 1, 1, NULL, NULL, NULL, NULL)
-```
-```tsql
-Zakup nieruchomości z ogłoszenia o ID_oferty 12 przez klienta o ID_klienta 34.
-EXEC ZakupNieruchomości 12, 34
-```
-```tsql
-Zarezerowanie nieruchomości z ogłoszenie o ID_oferty 9 przez klienta o ID_klienta 5 od 13 maja 2023 12:00 do 15 maja 2023 16:00.
-EXEC Rezerwacja 9, 5, '2023-05-13 12:00:00', '2023-05-15 16:00:00'
+CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
+AS
+    IF @OfferID IS NULL OR @CustomerID IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF (@OfferID IN (SELECT ID_aktualne FROM Aktualne) AND ((@OfferID NOT IN (SELECT ID_oferty FROM Rezerwacje) OR (@OfferID IN (SELECT ID_oferty FROM Rezerwacje WHERE ID_klienta LIKE @CustomerID))))) BEGIN
+        DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM Wszystkie_oferty INNER JOIN Nieruchomości ON  Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości WHERE ID_oferty = @OfferID)
+
+        DECLARE @multiplier FLOAT = (SELECT Zmiana_mnożnika FROM Trendy_rynkowe WHERE Miejscowość LIKE @place AND Rozpoczęcie <= GETDATE() AND Zakończenie > GETDATE())
+
+        IF @multiplier IS NULL BEGIN
+            SET @multiplier = 1
+        END
+
+        DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_nieruchomości = @OfferID)
+
+        INSERT INTO Sprzedane VALUES (@EstateID, @CustomerID, GETDATE(), @multiplier)
+        DELETE FROM Aktualne WHERE ID_aktualne = @OfferID
+
+        PRINT('SUKCES - udało Ci się zakupić tą nieruchmość!')
+
+        EXEC Synchronizuj
+    END
+    ELSE BEGIN
+        PRINT('BŁĄD - nieruchomość o podanym ID nie istenieje lub nie jest obecnie dostępna!')
+    END  
+GO
 ```
 
-# Wyzwalacze
-W momencie, w którym zostanie dodany trend, wyzwalacz aktualizuje ceny odpowiednich nieruchomości.
+Rezerwacja nieruchomości
 ```tsql
-CREATE TRIGGER Dodanie_trendu
+CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID VARCHAR(11), @End DATETIME)
+AS
+    IF @OfferID IS NULL OR @CustomerID IS NULL OR @End IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF @OfferID IN (SELECT ID_oferty FROM Wszystkie_oferty) BEGIN
+        DECLARE @EstateID INT = (SELECT ID_nieruchomości FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
+
+        IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
+            IF GETDATE() < @End AND GETDATE() < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN 
+                IF NOT EXISTS(SELECT ID_rezerwacji FROM Rezerwacje WHERE ID_oferty = @OfferID AND Początek <= GETDATE() AND Koniec > GETDATE()) BEGIN
+                    INSERT INTO Rezerwacje(ID_oferty, ID_klienta, Początek, Koniec) VALUES (@OfferID, @CustomerID, GETDATE(), @End)
+                    PRINT('SUKCES - pomyślnie dodano rezerwację!')
+                    EXEC Synchronizuj
+                END
+                ELSE BEGIN
+                    PRINT('BŁĄD - ta nieruchomość jest obecnie zarezerwowana!')
+                END
+            END
+            ELSE BEGIN
+                PRINT('BŁĄD - niewłaściwy przedział czasowy!')
+            END
+        END
+        ELSE BEGIN
+            PRINT('BŁĄD - to ogłosznie nie jest już aktualne!')
+        END
+    END
+    ELSE BEGIN
+        PRINT('BŁĄD - nie istnieje ogłoszenie o takim ID!')
+    END
+GO
+```
+
+Dodanie opinii
+```tsql
+CREATE PROCEDURE DodajOpinię (@CustomerID VARCHAR(11), @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
+AS
+    IF @CustomerID IS NULL OR @OfferID IS NULL OR @Grade IS NULL OR @Description IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF @Grade < 1 OR @Grade > 10 BEGIN
+    	PRINT('BŁĄD - ocena musi być z przedziału 1 - 10!')
+ 	END
+    ELSE IF @OfferID IN (SELECT ID_sprzedane FROM Sprzedane WHERE ID_kupującego = @CustomerID) BEGIN
+        IF (@OfferID NOT IN (SELECT ID_oferty FROM Opinie)) BEGIN
+            INSERT INTO Opinie(ID_oferty, Data_wystawienia_opinii, Ocena, Opis) VALUES (@OfferID, GETDATE(), @Grade, @Description)
+            PRINT('SUKCES - pomyślnie dodano opinię!')
+
+            EXEC Synchronizuj
+        END
+        ELSE BEGIN
+            PRINT('BŁĄD - zamieściłeś już opinię odnośnie tej nieruchomości!')
+        END
+    END
+    ELSE BEGIN
+        PRINT('BŁĄD - klient o podanym ID nie istnieje, nie zakupił żadnej nieruchomości lub tej o podanym ID!')
+    END
+GO
+```
+
+Rezerwacja terminu oglądania
+```tsql
+CREATE PROCEDURE ZarezerwujTerminOglądania (@CustomerID VARCHAR(11), @OfferID INT, @Start DATETIME, @End DATETIME)
+AS
+    IF @CustomerID IS NULL OR @OfferID IS NULL OR @Start IS NULL OR @End IS NULL BEGIN
+        PRINT('BŁĄD - niepełne dane!')
+    END
+    ELSE IF @OfferID IN (SELECT ID_aktualne FROM Aktualne) BEGIN
+        IF @Start < @End AND @Start >= GETDATE() AND @End > GETDATE() AND @Start < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) AND @End < (SELECT Data_zakończenia FROM Wszystkie_oferty WHERE ID_oferty = @OfferID) BEGIN
+            DECLARE @employee VARCHAR(11) = (SELECT Pracownik_obsługujący FROM Wszystkie_oferty WHERE ID_oferty = @OfferID)
+
+            IF @employee NOT IN (SELECT Pracownik_obsługujący FROM Terminy_oglądania INNER JOIN Wszystkie_oferty ON Terminy_oglądania.ID_oferty = Wszystkie_oferty.ID_oferty WHERE Pracownik_obsługujący LIKE @employee AND (@Start >= Data_zwiedzania_początek OR @End > Data_zwiedzania_początek) AND (@Start < Data_zwiedzania_koniec OR @End <= Data_zwiedzania_koniec)) BEGIN
+                IF DATEDIFF(SECOND, @Start, @End) >= 600 AND DATEDIFF(SECOND, @Start, @End) <= 7200 BEGIN
+                    INSERT INTO Terminy_oglądania(ID_oferty, ID_oglądającego, Data_zwiedzania_początek, Data_zwiedzania_koniec) VALUES (@OfferID, @CustomerID, @Start, @End)
+                    PRINT('SUKCES - zarezerwowano termin oglądania')
+
+                    EXEC Synchronizuj
+                END
+                ELSE BEGIN
+                    PRINT('BŁĄD - wizyta musi trwać minimalnie 10 minut, a maksymalnie 2 godziny!')
+                END
+            END
+            ELSE BEGIN
+                PRINT('BŁĄD - pracownik jest zajęty w tym terminie!')
+            END
+        END
+        ELSE BEGIN
+            PRINT('BŁĄD - niewłaściwy przedział czasowy lub ogłoszenie w tym czasie może już być nieaktualne!')
+        END   
+    END
+    ELSE BEGIN
+        PRINT('BŁĄD - nie istnieje aktualna oferta o podanym ID!')
+    END
+GO
+```
+
+## Wykonywanie Procedur
+
+
+# Wyzwalacze
+Dodanie trendu
+```tsql
+CREATE TRIGGER DodanieTrendu
 ON Trendy_rynkowe
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @mnoznik FLOAT = (SELECT Zmiana_Mnożnika FROM INSERTED)
-    DECLARE @miasto VARCHAR(MAX) = (SELECT Miejscowość FROM INSERTED)
+    DECLARE @loop_border INT = (SELECT MAX(ID_trendu) FROM INSERTED)
+    DECLARE @iterator INT = (SELECT MIN(ID_trendu) FROM INSERTED)
 
-    IF ((SELECT Nazwa_trendu FROM INSERTED) = 'wzrost')
-    BEGIN
-        UPDATE Nieruchomości
-        
-        SET Nieruchomości.Cena = Nieruchomości.Cena + Nieruchomości.Cena * @mnoznik
-        WHERE Nieruchomości.Miejscowość = @miasto AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
-    END
+    WHILE(@iterator <= @loop_border) BEGIN
+        IF EXISTS(SELECT ID_trendu FROM INSERTED WHERE ID_trendu = @iterator) BEGIN
+            DECLARE @multiplier FLOAT = (SELECT Zmiana_Mnożnika FROM INSERTED WHERE ID_trendu = @iterator)
+            DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM INSERTED WHERE ID_trendu = @iterator)
 
-    ELSE IF ((SELECT Nazwa_trendu FROM INSERTED) = 'spadek')
-    BEGIN
-        UPDATE Nieruchomości
-        SET Nieruchomości.Cena = Nieruchomości.Cena - Nieruchomości.Cena * @mnoznik
-        WHERE Nieruchomości.Miejscowość = @miasto AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+            IF ((SELECT Nazwa_trendu FROM INSERTED WHERE ID_trendu = @iterator) = 'wzrost')
+            BEGIN
+                UPDATE Nieruchomości        
+                    SET Nieruchomości.Cena = Nieruchomości.Cena * (1 + @multiplier) 
+                    WHERE Nieruchomości.Miejscowość = @place AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+            END
+
+            ELSE IF ((SELECT Nazwa_trendu FROM INSERTED WHERE ID_trendu = @iterator) = 'spadek')
+            BEGIN
+                UPDATE Nieruchomości
+                    SET Nieruchomości.Cena = Nieruchomości.Cena * (1 - @multiplier)
+                    WHERE Nieruchomości.Miejscowość = @place AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+            END
+        END
+
+        SET @iterator = @iterator + 1           
     END
 END
 GO
 ```
-W momencie, w którym zostanie utworzone ogłoszenie, wyzwalacz sam dobiera do niego pracownika obłsugującego, który w danym momencie obsługuje najmniej ogłoszeń.
+
+Koniec trendu
 ```tsql
-CREATE TRIGGER Przydzielenie_pracownika
-ON Wszystkie_oferty
+CREATE TRIGGER KoniecTrendu
+ON Trendy_rynkowe
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @loop_border INT = (SELECT MAX(ID_trendu) FROM DELETED)
+    DECLARE @iterator INT = (SELECT MIN(ID_trendu) FROM DELETED)
+
+    WHILE(@iterator <= @loop_border) BEGIN
+        IF EXISTS(SELECT ID_trendu FROM DELETED WHERE ID_trendu = @iterator) BEGIN
+            DECLARE @multiplier FLOAT = (SELECT Zmiana_Mnożnika FROM DELETED WHERE ID_trendu = @iterator)
+            DECLARE @place VARCHAR(MAX) = (SELECT Miejscowość FROM DELETED WHERE ID_trendu = @iterator)
+
+            IF ((SELECT Nazwa_trendu FROM DELETED WHERE ID_trendu = @iterator) = 'wzrost')
+            BEGIN
+                UPDATE Nieruchomości        
+                    SET Nieruchomości.Cena = Nieruchomości.Cena * 100 / (1 + @multiplier) 
+                    WHERE Nieruchomości.Miejscowość = @place AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+            END
+
+            ELSE IF ((SELECT Nazwa_trendu FROM DELETED WHERE ID_trendu = @iterator) = 'spadek')
+            BEGIN
+                UPDATE Nieruchomości
+                    SET Nieruchomości.Cena = Nieruchomości.Cena * 100 / (1 - @multiplier)
+                    WHERE Nieruchomości.Miejscowość = @place AND Nieruchomości.ID_nieruchomości IN (SELECT ID_aktualne FROM Aktualne)
+            END
+        END
+
+        SET @iterator = @iterator + 1           
+    END
+END
+GO
+```
+
+Przydzielenie pracownika
+```tsql
+CREATE TRIGGER PrzydzieleniePracownika
+ON Aktualne
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @pracownik INT = (SELECT TOP 1 ID_pracownika FROM Pracownicy ORDER BY Liczba_aktualnych_zleceń ASC)
+    DECLARE @loop_border INT = (SELECT MAX(ID_aktualne) FROM INSERTED)
+    DECLARE @iterator INT = (SELECT MIN(ID_aktualne) FROM INSERTED)
 
-    UPDATE Pracownicy
-        SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń + 1
-        WHERE ID_pracownika = @pracownik
+    WHILE(@iterator <= @loop_border) BEGIN
+        IF EXISTS(SELECT ID_aktualne FROM INSERTED WHERE ID_aktualne = @iterator) BEGIN
+            DECLARE @employee VARCHAR(11) = (SELECT TOP 1 ID_pracownika FROM Pracownicy ORDER BY Liczba_aktualnych_zleceń ASC)
 
-    UPDATE Wszystkie_oferty
-        SET Pracownik_obsługujący = @pracownik
-        WHERE ID_oferty = (SELECT TOP 1 ID_oferty FROM Wszystkie_oferty ORDER BY ID_oferty DESC)
+            UPDATE Pracownicy
+                SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń + 1
+                WHERE ID_pracownika = @employee
+
+            UPDATE Wszystkie_oferty
+                SET Pracownik_obsługujący = @employee
+                WHERE ID_oferty = @iterator
+        END
+
+        SET @iterator = @iterator + 1           
+    END
 END
 GO
 ```
-W przypadku sprzedania nieruchomości lub przeterminowania ogłoszenia, pracownik przestaje obsługiwać daną ogłoszenie.
+
+Zwolnienie pracownika sprzedane
 ```tsql
-CREATE TRIGGER Zwolnienie_pracownika_sprzedane
+CREATE TRIGGER ZwolnieniePracownikaSprzedane
 ON Sprzedane
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @pracownik INT = (SELECT Pracownik_obsługujący FROM INSERTED INNER JOIN Wszystkie_oferty ON INSERTED.ID_sprzedane = Wszystkie_oferty.ID_oferty)
+    DECLARE @loop_border INT = (SELECT MAX(ID_sprzedane) FROM INSERTED)
+    DECLARE @iterator INT = (SELECT MIN(ID_sprzedane) FROM INSERTED)
 
-    UPDATE Pracownicy
-        SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń - 1
-        WHERE ID_pracownika = @pracownik
+    WHILE(@iterator <= @loop_border) BEGIN
+        IF EXISTS(SELECT ID_sprzedane FROM INSERTED WHERE ID_sprzedane = @iterator) BEGIN
+            DECLARE @employee VARCHAR(11) = (SELECT Pracownik_obsługujący FROM INSERTED INNER JOIN Wszystkie_oferty ON INSERTED.ID_sprzedane = Wszystkie_oferty.ID_oferty WHERE INSERTED.ID_sprzedane = @iterator)
+
+            UPDATE Pracownicy
+                SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń - 1
+                WHERE ID_pracownika = @employee
+        END
+
+        SET @iterator = @iterator + 1           
+    END
 END
 GO
 ```
+
+Zwolnienie pracownika niesprzedane
 ```tsql
-CREATE TRIGGER Zwolnienie_pracownika_niesprzedane
+CREATE TRIGGER ZwolnieniePracownikaNiesprzedane
 ON Niesprzedane
 AFTER INSERT
 AS
 BEGIN
-    DECLARE @pracownik INT = (SELECT Pracownik_obsługujący FROM INSERTED INNER JOIN Wszystkie_oferty ON INSERTED.ID_niesprzedane = Wszystkie_oferty.ID_oferty)
+    DECLARE @loop_border INT = (SELECT MAX(ID_niesprzedane) FROM INSERTED)
+    DECLARE @iterator INT = (SELECT MIN(ID_niesprzedane) FROM INSERTED)
 
-    UPDATE Pracownicy
-        SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń - 1
-        WHERE ID_pracownika = @pracownik
-END
-GO
-```
-W momencie, w którym skończy się rezerwacja, ogłoszenie wraca do aktualnych (znów jest widoczne dla innych klientów).
-```tsql
-CREATE TRIGGER Koniec_rezerwacji
-ON Rezerwacje
-AFTER DELETE
-AS
-BEGIN
-    INSERT INTO Aktualne SELECT ID_oferty FROM DELETED 
+    WHILE(@iterator <= @loop_border) BEGIN
+        IF EXISTS(SELECT ID_niesprzedane FROM INSERTED WHERE ID_niesprzedane = @iterator) BEGIN
+            DECLARE @employee VARCHAR(11) = (SELECT Pracownik_obsługujący FROM INSERTED INNER JOIN Wszystkie_oferty ON INSERTED.ID_niesprzedane = Wszystkie_oferty.ID_oferty WHERE INSERTED.ID_niesprzedane = @iterator)
+
+            UPDATE Pracownicy
+                SET Liczba_aktualnych_zleceń = Liczba_aktualnych_zleceń - 1
+                WHERE ID_pracownika = @employee
+        END
+
+        SET @iterator = @iterator + 1           
+    END
 END
 GO
 ```

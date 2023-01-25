@@ -16,6 +16,9 @@ Spis tabel:
 15. Rezerwacje
 16. Opinie UZUPEŁNIONE
 
+OPIS: widoki, funkcje, procedury, wyzwalacze, schemat
+
+
 Rzeczy, które mogą być NULLami: Ulica(Nieruchomości), Email, zakończenie+trendu, opis opinii
 
 - usunięcie terminów oglądania dla sprzedanych ZROBIONE
