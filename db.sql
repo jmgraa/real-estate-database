@@ -60,6 +60,7 @@ CREATE TABLE Nieruchomości (
 	Cena INT NOT NULL,
     Możliwość_negocjacji_ceny BIT NOT NULL,
 
+    CHECK (Numer >= 0),
     CHECK (Powierzchnia > 0),
     CHECK (Cena > 0)
 )
@@ -70,7 +71,7 @@ CREATE TABLE Domy (
     Rodzaj_zabudowy VARCHAR(MAX) NOT NULL,
     Liczba_pokoi INT NOT NULL,
     Liczba_pięter INT NOT NULL,
-    Rodzaj_ogrzewania VARCHAR(MAX),
+    Rodzaj_ogrzewania VARCHAR(MAX) NOT NULL,
 
     CHECK (Liczba_pokoi > 0),
     CHECK (Liczba_pięter >= 0)
@@ -85,7 +86,7 @@ CREATE TABLE Mieszkania (
     Ogrzewanie_z_sieci BIT NOT NULL,
     Winda_w_budynku BIT NOT NULL,
 
-    CHECK(Numer_mieszkania >= 0)
+    CHECK (Numer_mieszkania >= 0)
 )
 
 CREATE TABLE Działki (
@@ -117,11 +118,13 @@ CREATE TABLE Pracownicy (
 
     Liczba_aktualnych_zleceń INT DEFAULT 0,
     Stanowisko VARCHAR(MAX) NOT NULL,
+
+    CHECK (Liczba_aktualnych_zleceń >= 0)
 )
 
 CREATE TABLE Cechy_nieruchomości (
-    ID_nieruchomości INT,
-    Nazwa_cechy VARCHAR(450),
+    ID_nieruchomości INT NOT NULL,
+    Nazwa_cechy VARCHAR(450) NOT NULL,
 
     CONSTRAINT ID_cechy PRIMARY KEY (ID_nieruchomości, Nazwa_cechy),
 
@@ -131,7 +134,7 @@ CREATE TABLE Cechy_nieruchomości (
 CREATE TABLE Wszystkie_oferty (
     ID_oferty INT IDENTITY(1,1) PRIMARY KEY,
 
-    ID_nieruchomości INT NOT NULL UNIQUE,
+    ID_nieruchomości INT NOT NULL,
     Pracownik_obsługujący VARCHAR(11) DEFAULT NULL,
     Data_wystawienia DATETIME NOT NULL,
     Data_zakończenia DATETIME NOT NULL,
@@ -157,7 +160,9 @@ CREATE TABLE Sprzedane (
     Data_sprzedania DATETIME NOT NULL,    
     Mnożnik_ceny FLOAT DEFAULT 1,
 
-    FOREIGN KEY (ID_kupującego) REFERENCES Klienci(ID_klienta)
+    FOREIGN KEY (ID_kupującego) REFERENCES Klienci(ID_klienta),
+
+    CHECK(Mnożnik_ceny > 0)
 )
 
 CREATE TABLE Terminy_oglądania (
@@ -169,7 +174,9 @@ CREATE TABLE Terminy_oglądania (
     Data_zwiedzania_koniec DATETIME NOT NULL,
     
     FOREIGN KEY (ID_oferty) REFERENCES Aktualne(ID_aktualne) ON DELETE CASCADE,
-    FOREIGN KEY (ID_oglądającego) REFERENCES Klienci(ID_klienta),    
+    FOREIGN KEY (ID_oglądającego) REFERENCES Klienci(ID_klienta),
+
+    CHECK (Data_zwiedzania_początek < Data_zwiedzania_koniec)    
 )
 
 CREATE TABLE Trendy_rynkowe (
@@ -188,7 +195,7 @@ CREATE TABLE Trendy_rynkowe (
 CREATE TABLE Rezerwacje (
     ID_rezerwacji INT IDENTITY(1,1) PRIMARY KEY,
     ID_oferty INT NOT NULL,
-    ID_klienta VARCHAR(11),
+    ID_klienta VARCHAR(11) NOT NULL,
     Początek DATETIME NOT NULL,
     Koniec DATETIME NOT NULL,
 
