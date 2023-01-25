@@ -25,18 +25,113 @@ Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabela
     - Klienci
     - Pracownicy
 - Cechy nieruchomości
-- Terminy oglądania
 - Wszystkie oferty
     - Aktualne
     - Sprzedane
     - Niesprzedane
 - Trendy rynkowe
+- Terminy oglądania
 - Rezerwacje
 - Opinie
 
 # Widoki
 
+Ranking pracowników na podstawie ocen klientów (pod uwagę brani są tylko pracownicy z co najmniej jedną oceną)
+```tsql
+CREATE VIEW Ranking_pracowników AS
+	SELECT Os.Imię, Os.Nazwisko, P.ID_pracownika, AVG(O.Ocena) AS Średnia_ocena FROM Opinie O
+	INNER JOIN Wszystkie_oferty W ON W.ID_oferty = O.ID_Oferty
+	INNER JOIN Pracownicy P ON W.Pracownik_obsługujący = P.ID_pracownika
+	INNER JOIN Osoby Os ON Os.Pesel = P.ID_pracownika
+	GROUP BY P.ID_pracownika,Os.Imię, Os.Nazwisko
+GO
+```
 
+Suma wartości nieruchomości w poszczególnych miejscowościach
+```tsql
+CREATE VIEW Suma_wartości AS
+	SELECT Miejscowość, SUM(Cena) AS [Suma nieruchmości] FROM Nieruchomości
+	GROUP BY Miejscowość
+GO
+```
+
+Liczba obecnie zarezerwowanych terminów oglądania pracownika
+```tsql
+CREATE VIEW Liczba_terminów_pracowników AS
+	SELECT O.Imię, O.Nazwisko, O.Numer_telefonu , COUNT(Id_terminu) AS [Liczba zarezerwowanych terminów] FROM Osoby O
+	INNER JOIN Pracownicy P ON
+	O.Pesel = P.Id_pracownika
+	LEFT JOIN Wszystkie_oferty W ON
+	W.Pracownik_obsługujący = P.ID_pracownika
+	INNER JOIN Terminy_oglądania T ON
+	W.ID_oferty = T.ID_oferty
+	GROUP BY O.Imię, O.Nazwisko, O.Numer_telefonu
+GO
+```
+
+Obrót pracowników - suma wartości sprzedanych przez nich nieruchomości
+```tsql
+CREATE VIEW Obrót_pracowników AS
+	SELECT Osoby.Imię, Osoby.Nazwisko, SUM(Nieruchomości.Cena) AS [Suma sprzedanych nieruchomości] FROM Pracownicy 
+	LEFT JOIN Osoby ON Pracownicy.ID_pracownika = Osoby.Pesel
+	LEFT JOIN Wszystkie_oferty ON Pracownicy.ID_pracownika = Wszystkie_oferty.Pracownik_obsługujący
+	LEFT JOIN Nieruchomości ON Wszystkie_oferty.ID_nieruchomości = Nieruchomości.ID_nieruchomości
+	LEFT JOIN Sprzedane ON Sprzedane.ID_sprzedane = Wszystkie_oferty.ID_nieruchomości
+	GROUP BY Osoby.Imię, Osoby.Nazwisko
+GO
+```
+
+Aktualne oferty danego pracownika
+```tsql
+CREATE VIEW Pracownik_aktualne AS
+	SELECT O.Pesel, COUNT(A.ID_aktualne) AS [Ilosc aktualnych] FROM Osoby O
+	INNER JOIN Wszystkie_oferty W ON
+	W.Pracownik_obsługujący = O.Pesel
+	LEFT JOIN
+	Aktualne A ON
+	W.ID_oferty = A.ID_aktualne
+GROUP BY O.Pesel
+GO
+```
+
+Sprzedane nieruchomości danego pracownika
+```tsql
+CREATE VIEW Pracownik_sprzedane AS
+	SELECT O.Pesel, COUNT(S.ID_sprzedane) AS [Ilosc sprzedanych] FROM Osoby O
+	INNER JOIN Wszystkie_oferty W ON
+	W.Pracownik_obsługujący = O.Pesel
+	LEFT JOIN
+	Sprzedane S ON
+	W.ID_oferty = S.ID_sprzedane
+GROUP BY O.Pesel
+GO
+```
+
+Niesprzedane nieruchomości danego pracownika
+```tsql
+CREATE VIEW Pracownik_niesprzedane AS
+	SELECT O.Pesel, COUNT(N.ID_niesprzedane) AS [Ilosc niesprzedanych] FROM Osoby O
+	INNER JOIN Wszystkie_oferty W ON
+	W.Pracownik_obsługujący = O.Pesel
+	LEFT JOIN
+	Niesprzedane N ON
+	W.ID_oferty = N.ID_niesprzedane
+GROUP BY O.Pesel
+GO
+```
+
+Statystyki pracowników - liczby aktualnych, sprzedanych i niesprzedanych ofert
+```tsql
+CREATE VIEW Pracownik_statystyki AS
+	SELECT O.Imię, O.Nazwisko, O.Numer_telefonu, Pa.[Ilosc aktualnych], Ps.[Ilosc sprzedanych], Pn.[Ilosc niesprzedanych] FROM Osoby O 
+	INNER JOIN Pracownik_aktualne Pa ON
+	Pa.Pesel = O.Pesel
+	INNER JOIN Pracownik_sprzedane Ps ON
+	Ps.Pesel = O.Pesel
+	INNER JOIN Pracownik_niesprzedane Pn ON
+	Pn.Pesel = O.Pesel
+GO
+```
 # Funkcje
 
 
