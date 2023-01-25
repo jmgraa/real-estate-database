@@ -1,7 +1,5 @@
-# Baza Danych Szkoły
+# Baza danych firmy pośredniczącej w sprzedaży nieruchomości
 Autorzy: Jakub Magiera, Konrad Sitek
-
-Projekt "Baza danych firmy pośredniczącej w sprzedaży nieruchomości"
 
 # Założenia projektu
 Projekt dotyczył stworzenia bazy danych dla firmy pośredniczącej w sprzedaży nieruchomości. Celem projektu było stworzenie skutecznego narzędzia do zarządzania ofertami nieruchomości oraz udostępnianie ich klientom.
@@ -229,7 +227,7 @@ AS
     INSERT INTO Niesprzedane SELECT ID_oferty FROM Wszystkie_oferty WHERE ID_oferty NOT IN (SELECT ID_niesprzedane FROM Niesprzedane) AND ID_oferty NOT IN (SELECT ID_sprzedane FROM Sprzedane) AND Data_zakończenia <= GETDATE()
 
     --usunięcie przedawnionych ofert z aktualnych
-	DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
+    DELETE FROM Aktualne WHERE ID_aktualne IN (SELECT ID_niesprzedane FROM Niesprzedane)
 
     --usuniecie przedawnionej rezerwacji
     DELETE FROM Rezerwacje WHERE Koniec <= GETDATE()
