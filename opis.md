@@ -25,6 +25,8 @@ Strategia pielęgnacji bazy danych może obejmować następujące kroki:
 Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabelami w bazie.
 ![DiagramER](diagram.png)
 
+![ERRelacje](er_relacje.png)
+
 # Schemat bazy danych
 ![SchematBazyDanych](schemat.png)
 
