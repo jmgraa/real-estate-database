@@ -1,53 +1,54 @@
 IF OBJECT_ID('Domy','U') IS NOT NULL
 	DROP TABLE Domy
-
+GO
 IF OBJECT_ID('Mieszkania','U') IS NOT NULL
 	DROP TABLE Mieszkania
-
+GO
 IF OBJECT_ID('Działki','U') IS NOT NULL
 	DROP TABLE Działki
-
+GO
 IF OBJECT_ID('Cechy_nieruchomości','U') IS NOT NULL
 	DROP TABLE Cechy_nieruchomości
-
+GO
 IF OBJECT_ID('Rezerwacje','U') IS NOT NULL
 	DROP TABLE Rezerwacje
-
+GO
 IF OBJECT_ID('Terminy_oglądania','U') IS NOT NULL
 	DROP TABLE Terminy_oglądania
-
+GO
 IF OBJECT_ID('Oferty_kupna', 'U') IS NOT NULL
     DROP TABLE Oferty_kupna
-
+GO
 IF OBJECT_ID('Aktualne', 'U') IS NOT NULL
     DROP TABLE Aktualne
-
+GO
 IF OBJECT_ID('Niesprzedane', 'U') IS NOT NULL
     DROP TABLE Niesprzedane
-
+GO
 IF OBJECT_ID('Opinie','U') IS NOT NULL
 	DROP TABLE Opinie
-
+GO
 IF OBJECT_ID('Sprzedane', 'U') IS NOT NULL
     DROP TABLE Sprzedane
-
+GO
 IF OBJECT_ID('Wszystkie_oferty', 'U') IS NOT NULL
     DROP TABLE Wszystkie_oferty
-
+GO
 IF OBJECT_ID('Trendy_rynkowe','U') IS NOT NULL
 	DROP TABLE Trendy_rynkowe
-
+GO
 IF OBJECT_ID('Klienci','U') IS NOT NULL
 	DROP TABLE Klienci
-
+GO
 IF OBJECT_ID('Pracownicy','U') IS NOT NULL
 	DROP TABLE Pracownicy
-
+GO
 IF OBJECT_ID('Osoby', 'U') IS NOT NULL
     DROP TABLE Osoby
-
+GO
 IF OBJECT_ID('Nieruchomości','U') IS NOT NULL
 	DROP TABLE Nieruchomości
+GO
 
 CREATE TABLE Nieruchomości (
 	ID_nieruchomości INT IDENTITY(1,1) PRIMARY KEY,
@@ -162,7 +163,7 @@ CREATE TABLE Sprzedane (
 
     FOREIGN KEY (ID_kupującego) REFERENCES Klienci(ID_klienta),
 
-    CHECK(Mnożnik_ceny > 0)
+    CHECK (Mnożnik_ceny > 0)
 )
 
 CREATE TABLE Terminy_oglądania (

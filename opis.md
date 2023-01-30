@@ -4,11 +4,23 @@ Autorzy: Jakub Magiera, Konrad Sitek
 # Założenia projektu
 Projekt dotyczył stworzenia bazy danych dla firmy pośredniczącej w sprzedaży nieruchomości. Celem projektu było stworzenie skutecznego narzędzia do zarządzania ofertami nieruchomości oraz udostępnianie ich klientom.
 
-Baza danych zawiera informacje o ofertach nieruchomości, takie jak typ nieruchomości, lokalizacja, cena itp oraz pozwala zarządzać nimi: dodawać nowe oferty, grupować je według status (aktualne / sprzedane / niesprzedane), publikować opinie oraz śledzić pracę pracowników. Baza danych umożliwia również automatyczne modyfikowanie cen istniejących ofert, zgodnie z tym co obecnie dzieje się na rynku (trendy).
+Baza danych zawiera informacje o ofertach nieruchomości, takie jak typ nieruchomości, lokalizacja, cena itp. oraz pozwala zarządzać nimi: dodawać nowe oferty, grupować je według status (aktualne / sprzedane / niesprzedane), publikować opinie oraz śledzić pracę pracowników. Baza danych umożliwia również automatyczne modyfikowanie cen istniejących ofert, zgodnie z tym co obecnie dzieje się na rynku (trendy).
+
+Na potrzeby projektu ograniczyliśmy się do trzech typów nieruchomośći: domy, mieszkania oraz działki.
 
 ## Schemat Pielęgnacji Bazy Danych
 
-???
+Strategia pielęgnacji bazy danych może obejmować następujące kroki:
+
+1. Regularne aktualizacje danych - sprawdzanie czy są one nadal aktualne (w przypadkach, których baza automatycznie nie obsłuży).
+
+2. Usuwanie duplikatów i nieaktualnych danych - usuwanie duplikatów i informacji, które już nie są aktualne, aby zachować czystość i przejrzystość bazy danych oraz zapewnić jej bezbłędne działanie.
+
+3. Backup bazy danych - tworzenie regularnych kopii zapasowych, aby uniknąć utraty danych w razie awarii systemu. Przewdiujemy łączyć backup lokalny oraz zdalny. Codziennie o określonej porze następowałaby migracja danych na zewnętrzny serwis (do chmury). Raz na tydzień lub dwa (w zależności od zmian w bazie, liczbie działań) wykonywany byłby backup lokalny na dyski twarde przechowywane w bezpiecznym miejscu w siedzibie firmy. 
+
+4. Ochrona danych - zabezpieczenie bazy przed nieautoryzowanym dostępem i modyfikacją.
+
+5. Analiza danych - regularna analiza danych z bazy, aby zidentyfikować możliwe ulepszenia i poprawić efektywność działania firmy.
 
 # Diagram ER
 Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabelami w bazie.
@@ -34,6 +46,32 @@ Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabela
 - Terminy oglądania
 - Rezerwacje
 - Opinie
+
+# Dodatkowe więzy nieuwzględnione w schemacie
+- Nieruchomości:
+    - Numer >= 0,
+    - Powierzchnia > 0,
+    - Cena > 0.
+- Domy:
+    - Liczba_pokoi > 0,
+    - Liczba_pięter >= 0.
+- Mieszkania:
+    - Numer_mieszkania >= 0.
+- Pracownicy:
+    - Liczba_aktualnych_zleceń >= 0.
+- Wszystkie oferty:
+    - Data_wystawienia < Data_zakończenia.
+- Sprzedane:
+    - Mnożnik_ceny > 0
+- Terminy oglądania:
+    - Data_zwiedzania_początek < Data_zwiedzania_koniec .
+- Trendy rynkowe:
+    - Rozpoczęcie < Zakończenie,
+    - Zmiana_Mnożnika > 0 AND Zmiana_Mnożnika <= 1.
+- Rezerwacje:
+    - Początek < Koniec.
+- Opinie
+    - Ocena >= 0 && Ocena <= 10.
 
 # Widoki
 
@@ -143,7 +181,6 @@ GO
 ```
 
 # Funkcje
-
 Nieruchomości znajdujące się w danym mieście
 ```tsql
 CREATE FUNCTION Aktualne_z_miasta(@x VARCHAR(MAX))
@@ -209,10 +246,8 @@ RETURN
 	WHERE W.ID_nieruchomości = @x
 GO
 
-## Użycie funkcji
-
-
 # Procedury składowane
+W przypadku procedur, w których parametrem jest ID klienta zakładamy, że zostałoby przekazane przez klienta, który by je pobrał od aktualnie zalogowanego użytkownika.
 
 Poniższa procedura synchronizuje wszystkie tabele w bazie, których zawartość jest zależna od czasu. W prawdziwej bazie, data byłaby sprawdzana automatycznie w każdym momencie. Na potrzeby naszego projektu istnieje procedura.
 ```tsql
@@ -313,7 +348,7 @@ AS
 GO
 ```
 
-Dodanie ogłoszenia
+Dodanie ogłoszenia - parametry: ID ogłoszenia, data zakończenia ogłoszenia
 ```tsql
 CREATE PROCEDURE DodajOgłoszenie (@EstateID INT, @End DATETIME)
 AS
@@ -341,7 +376,7 @@ AS
 GO
 ```
 
-Zakup nieruchomości z danej oferty
+Zakup nieruchomości z danej oferty - parametry: ID ogłoszenia, ID klienta
 ```tsql
 CREATE PROCEDURE ZakupNieruchomości (@OfferID INT, @CustomerID VARCHAR(11))
 AS
@@ -372,7 +407,7 @@ AS
 GO
 ```
 
-Rezerwacja nieruchomości
+Rezerwacja nieruchomości - parametry: ID ogłoszenia, ID klienta, data zakończenia rezerwacji
 ```tsql
 CREATE PROCEDURE Rezerwacja (@OfferID INT, @CustomerID VARCHAR(11), @End DATETIME)
 AS
@@ -407,7 +442,7 @@ AS
 GO
 ```
 
-Dodanie opinii
+Dodanie opinii - parametry: ID klienta, ID ogłoszenia, ocena, opis
 ```tsql
 CREATE PROCEDURE DodajOpinię (@CustomerID VARCHAR(11), @OfferID INT, @Grade INT, @Description VARCHAR(MAX))
 AS
@@ -434,7 +469,7 @@ AS
 GO
 ```
 
-Rezerwacja terminu oglądania
+Rezerwacja terminu oglądania - ID klienta, ID ogłoszenia, początek terminu oglądania, koniec terminu oglądania
 ```tsql
 CREATE PROCEDURE ZarezerwujTerminOglądania (@CustomerID VARCHAR(11), @OfferID INT, @Start DATETIME, @End DATETIME)
 AS
@@ -470,11 +505,8 @@ AS
 GO
 ```
 
-## Wykonywanie Procedur
-
-
 # Wyzwalacze
-Dodanie trendu
+Dodanie trendu - akualizuje ceny wszystkich ogłoszeń, z których nieruchomości znajdują się w danym mieście
 ```tsql
 CREATE TRIGGER DodanieTrendu
 ON Trendy_rynkowe
@@ -510,7 +542,7 @@ END
 GO
 ```
 
-Koniec trendu
+Koniec trendu - przywrócenie pierwotnej ceny po zakończeniu trendu
 ```tsql
 CREATE TRIGGER KoniecTrendu
 ON Trendy_rynkowe
@@ -546,7 +578,7 @@ END
 GO
 ```
 
-Przydzielenie pracownika
+Przydzielenie pracownika - przydzielenie pracownika o najmniejszej ilości aktualnych ogłoszeń do nowego ogłoszenia
 ```tsql
 CREATE TRIGGER PrzydzieleniePracownika
 ON Aktualne
@@ -575,7 +607,7 @@ END
 GO
 ```
 
-Zwolnienie pracownika sprzedane
+Zwolnienie pracownika sprzedane - usunięcie z licznika aktulnych ogłoszeń sprzedanego ogłoszenia
 ```tsql
 CREATE TRIGGER ZwolnieniePracownikaSprzedane
 ON Sprzedane
@@ -600,7 +632,7 @@ END
 GO
 ```
 
-Zwolnienie pracownika niesprzedane
+Zwolnienie pracownika niesprzedane - usunięcie z licznika aktulnych ogłoszeń niesprzedanego ogłoszenia
 ```tsql
 CREATE TRIGGER ZwolnieniePracownikaNiesprzedane
 ON Niesprzedane
@@ -624,3 +656,5 @@ BEGIN
 END
 GO
 ```
+
+# Przykładowe zapytania
