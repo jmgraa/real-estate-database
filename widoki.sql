@@ -1,54 +1,42 @@
 IF OBJECT_ID('Ranking_pracowników', 'V') IS NOT NULL
     DROP VIEW Ranking_pracowników
 GO
-
 IF OBJECT_ID('Liczba_ofert_w_miesiącu', 'V') IS NOT NULL
     DROP VIEW Liczba_ofert_w_miesiącu
 GO
-
 IF OBJECT_ID('Suma_wartości', 'V') IS NOT NULL
     DROP VIEW Suma_wartości
 GO
-
 IF OBJECT_ID('Liczba_terminów_pracowników', 'V') IS NOT NULL
     DROP VIEW Liczba_terminów_pracowników
 GO
-
 IF OBJECT_ID('Obrót_pracowników', 'V') IS NOT NULL
     DROP VIEW Obrót_pracowników
 GO
-
 IF OBJECT_ID('Aktualne_z_miasta', 'IF') IS NOT NULL
     DROP FUNCTION Aktualne_z_miasta
 GO
-
 IF OBJECT_ID('Oferty_typu', 'TF') IS NOT NULL
     DROP FUNCTION Oferty_typu
 GO
-
 IF OBJECT_ID('Oferty_od_do','IF') IS NOT NULL
     DROP FUNCTION Oferty_od_do
- GO
- 
- IF OBJECT_ID('Info_oferta', 'IF') IS NOT NULL
-	DROP FUNCTION Info_oferta
-GO
-
+GO 
 IF OBJECT_ID('Info_oferta', 'IF') IS NOT NULL
 	DROP FUNCTION Info_oferta
-	
+GO
+IF OBJECT_ID('Info_oferta', 'IF') IS NOT NULL
+	DROP FUNCTION Info_oferta
+GO	
 IF OBJECT_ID('Pracownik_aktualne', 'V') IS NOT NULL
     DROP VIEW Pracownik_aktualne
 GO
-
 IF OBJECT_ID('Pracownik_sprzedane', 'V') IS NOT NULL
     DROP VIEW Pracownik_sprzedane
 GO
-
 IF OBJECT_ID('Pracownik_niesprzedane', 'V') IS NOT NULL
     DROP VIEW Pracownik_niesprzedane
 GO
-
 IF OBJECT_ID('Pracownik_statystyki', 'V') IS NOT NULL
     DROP VIEW Pracownik_statystyki
 GO
