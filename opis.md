@@ -235,6 +235,7 @@ GO
 ```
 
 Wyswietlenie wszystkich informacji odnośnie nieruchomości z danej oferty 
+```tsql
 CREATE FUNCTION Info_oferta(@x INT)
 RETURNS TABLE
 AS
@@ -245,6 +246,7 @@ RETURN
 	W.ID_nieruchomości = N.ID_nieruchomości
 	WHERE W.ID_nieruchomości = @x
 GO
+```
 
 # Procedury składowane
 W przypadku procedur, w których parametrem jest ID klienta zakładamy, że zostałoby przekazane przez klienta, który by je pobrał od aktualnie zalogowanego użytkownika.
@@ -658,3 +660,6 @@ GO
 ```
 
 # Przykładowe zapytania
+
+# Plik tworzący bazę danych
+![SchematBazyDanych](create_database.sql)
