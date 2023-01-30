@@ -661,4 +661,4 @@ GO
 
 # Przykładowe zapytania
 
-# [Plik tworzący bazę danych tutaj](create_database.sql)
+# [Plik tworzący bazę danych](create_database.sql)
