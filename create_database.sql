@@ -207,7 +207,7 @@ CREATE TABLE Pracownicy (
     Liczba_aktualnych_zleceń INT DEFAULT 0,
     Stanowisko VARCHAR(MAX) NOT NULL,
 
-    CHECK (Liczba_aktualnych_zleceń >= 0)
+    CHECK (Liczba_aktualnych_zleceń >= 0 OR Liczba_aktualnych_zleceń IS NULL)
 )
 
 CREATE TABLE Cechy_nieruchomości (
@@ -539,6 +539,8 @@ AS
         PRINT('BŁĄD - nie istnieje aktualna oferta o podanym ID!')
     END
 GO
+
+--W PRZYPADKU UŻYWANIA DANYCH TESTOWYCH PROSZĘ DODAĆ JE TERAZ
 
 CREATE TRIGGER DodanieTrendu
 ON Trendy_rynkowe
