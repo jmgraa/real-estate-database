@@ -274,6 +274,8 @@ INSERT INTO Wszystkie_oferty(ID_nieruchomości, Data_wystawienia, Data_zakończe
 (37, '2022-06-03 11:50:00', '2023-08-06 20:17:00'),
 (30, '2022-11-10 03:33:00', '2023-11-16 20:57:00')
 
+EXEC Synchronizuj
+
 INSERT INTO Sprzedane VALUES 
 (5, '08230862902', '2022-12-26 10:14:00', 1),
 (9, '10300356413', '2022-12-10 11:57:00', 1),
