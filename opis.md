@@ -8,8 +8,7 @@ Baza danych zawiera informacje o ofertach nieruchomości, takie jak typ nierucho
 
 Na potrzeby projektu ograniczyliśmy się do trzech typów nieruchomośći: domy, mieszkania oraz działki.
 
-## Schemat Pielęgnacji Bazy Danych
-
+# Schemat pielęgnacji bazy danych
 Strategia pielęgnacji bazy danych może obejmować następujące kroki:
 
 1. Regularne aktualizacje danych - sprawdzanie czy są one nadal aktualne (w przypadkach, których baza automatycznie nie obsłuży).
@@ -74,7 +73,6 @@ Na diagramie znajduję sie graficzna reprezentacja zależności pomiędzy tabela
     - Ocena >= 0 && Ocena <= 10.
 
 # Widoki
-
 Ranking pracowników na podstawie ocen klientów (pod uwagę brani są tylko pracownicy z co najmniej jedną oceną)
 ```tsql
 CREATE VIEW Ranking_pracowników AS
@@ -661,4 +659,4 @@ GO
 
 # Przykładowe zapytania
 
-# [Plik tworzący bazę danych](create_database.sql)
+# [Skrypt tworzący bazę danych](create_database.sql)
