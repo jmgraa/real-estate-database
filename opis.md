@@ -659,4 +659,101 @@ GO
 
 # Przykładowe zapytania
 
+Dodawanie nieruchomości
+```tsql
+--dodanie domu
+EXEC DodajNieruchomość 'dom','Sosnowa', 31 , 'Częstochowa', 312,1104001, 1 , 'wolnostojący' , 15 , 2 , 'gaz', NULL , NULL , NULL , NULL , NULL, NULL, NULL,NULL
+
+--dodanie mieszkania
+EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, 2 , 1 , 1 , 1 , NULL, NULL, NULL,NULL
+
+--dodanie mieszkania w tym samym budnyku, lecz z innym numerem
+EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 80,420000, 0 , 'apartament' , NULL , NULL , NULL, 3 , 1 , 1 , 1 , NULL, NULL, NULL,NULL
+
+--dodanie działki
+EXEC DodajNieruchomość 'działka','Słoneczna', 68 , 'Kraków',100000 ,530123, 0 , 'budowlana' , NULL , NULL , NULL, NULL , NULL , NULL , NULL , 1, 1,1,1
+
+--BŁĄD - dodanie nieruchomości o niewłaściwym typie
+EXEC DodajNieruchomość 'chalupa','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, NULL , 1 , 1 , 1 , NULL, NULL, NULL,NULL
+
+--BŁAD - dodanie nieruchomości z brakującymi parameterami
+EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, NULL , 1 , 1 , 1 , NULL, NULL, NULL,NULL
+```
+
+Dodawanie ogłoszeń:
+```tsql
+EXEC DodajOgłoszenie 52, '2023-05-01'
+EXEC DodajOgłoszenie 53, '2024-01-02'
+EXEC DodajOgłoszenie 54,'2023-02-01'
+
+--BŁĄD - dodanie ogłoszenia nieruchomości, której ogłoszenie już istnieje
+EXEC DodajOgłoszenie 54,'2024-02-01'
+
+--BŁĄD - dodanie ogłoszenia dla nieistniejącej nieruchomości
+EXEC DodajOgłoszenie 55,'2023-02-01'
+```
+
+Zakup nieruchomości:
+```tsql
+--zakup nieruchomości
+EXEC ZakupNieruchomości 2, '31072069990'
+
+--BŁĄD - zakup nieruchomości, która już jest sprzedana
+EXEC ZakupNieruchomości 45,'24102948963'
+```
+
+Dodawanie opinii:
+```tsql
+--dodanie opinii
+EXEC DodajOpinię '22110855460',18, 10 ,'Wszystko super!'
+
+--BŁAD - dodanie opinii z niewłaściwią oceną
+EXEC DodajOpinię '22110855460',18, 11 ,'Zbyt wysoka ocena'
+
+--BŁĄD - dodanie opinii do ogłoszenia, dla którego klient zamieścił już opinię
+EXEC DodajOpinię '22110855460',18, 10 ,'Dodanie opini jeszcze raz'
+```
+
+Rezerwowanie terminu oglądania:
+```tsql
+--rezerwacja terminu oglądania
+EXEC ZarezerwujTerminOglądania '08230862902', 51,  '2023-03-01 16:00:30', '2023-03-01 17:00:00'
+
+--BŁĄD - rezerwacja terminu kiedy pracownik obsługujący nieruchomość jest już zajęty
+EXEC ZarezerwujTerminOglądania '20082281942', 51,  '2023-03-01 16:50:30', '2023-03-01 18:00:00'
+
+--BŁĄD - rezerwacja, która trwa za długo
+EXEC ZarezerwujTerminOglądania '86072900736', 20,  '2023-03-01 12:00:00', '2023-03-02 18:00:00'
+
+--BŁAD - rezerwacja nie mieści się w ramach czasowych
+EXEC ZarezerwujTerminOglądania '08230862902', 3,  '2024-03-01 12:00:00', '2024-03-01 13:00:00'
+
+--BŁĄD - rezerwacja nieistniejącego ogłoszenia
+EXEC ZarezerwujTerminOglądania '20082281942',1000,'2023-05-01 15:00', '2023-05-01 16:00'
+
+--BŁĄD - rezerwacja ogłoszenia, które nie jest w tym czasie aktualne
+EXEC ZarezerwujTerminOglądania '20082281942',20,'2022-05-01 15:00', '2022-05-01 16:00'
+```
+
+Rezerwowanie nieruchomości:
+```tsql
+--rezerwacja nieruchomości
+EXEC Rezerwacja 1,'40071541277','2023-05-01' 
+
+--BŁĄD - rezerwacja zarezerwowanej już nieruchomości
+EXEC Rezerwacja 1,'31072069990','2023-05-02' 
+
+--BŁĄD - rezerwacja z niepoprawnym przedziałem czasowym
+EXEC Rezerwacja 1,'35020376651','2027-05-02' 
+
+--BŁĄD - rezerwacja sprzedanej nieruchomości
+EXEC Rezerwacja 5,'31072069990','2023-04-10'
+
+--BŁĄD - zakup nieruchomości zarezerwowanej przez innego klienta
+EXEC ZakupNieruchomości 1,'31072069990'
+
+--zakup nieruchomości zarezerwowanej przez klienta
+EXEC ZakupNieruchomości 1,'40071541277'
+```
+
 # [Skrypt tworzący bazę danych](create_database.sql)
