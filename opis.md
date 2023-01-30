@@ -1,6 +1,8 @@
 # Baza danych firmy pośredniczącej w sprzedaży nieruchomości
 Autorzy: Jakub Magiera, Konrad Sitek
 
+![udział](tak.png)
+
 # Założenia projektu
 Projekt dotyczył stworzenia bazy danych dla firmy pośredniczącej w sprzedaży nieruchomości. Celem projektu było stworzenie skutecznego narzędzia do zarządzania ofertami nieruchomości oraz udostępnianie ich klientom.
 
