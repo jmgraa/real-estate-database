@@ -662,4 +662,5 @@ GO
 # Przykładowe zapytania
 
 # Plik tworzący bazę danych
+[Kliknij tutaj](create_database.sql)
 ![SchematBazyDanych](create_database.sql)
