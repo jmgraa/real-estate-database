@@ -1,33 +1,48 @@
 --Testowanie 
 
+
+
+
+
+
+
+
+
+--dodanie domu
+EXEC DodajNieruchomość 'dom','Sosnowa', 31 , 'Częstochowa', 312,1104001, 1 , 'wolnostojący' , 15 , 2 , 'gaz', NULL , NULL , NULL , NULL , NULL, NULL, NULL,NULL
+
+--dodanie mieszkania
+EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, 2 , 1 , 1 , 1 , NULL, NULL, NULL,NULL
+
+--dodanie mieszkania w tym samym budnyku, lecz z innym numerem
+EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 80,420000, 0 , 'apartament' , NULL , NULL , NULL, 3 , 1 , 1 , 1 , NULL, NULL, NULL,NULL
+
+--dodanie działki
+EXEC DodajNieruchomość 'działka','Słoneczna', 68 , 'Kraków',100000 ,530123, 0 , 'budowlana' , NULL , NULL , NULL, NULL , NULL , NULL , NULL , 1, 1,1,1
+
+--BŁĄD - dodanie nieruchomości o niewłaściwym typie
+EXEC DodajNieruchomość 'chalupa','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, NULL , 1 , 1 , 1 , NULL, NULL, NULL,NULL
+
+--BŁAD - dodanie nieruchomości z brakującymi parameterami
+EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, NULL , 1 , 1 , 1 , NULL, NULL, NULL,NULL
+
+
+EXEC DodajOgłoszenie 52, '2023-05-01'
+EXEC DodajOgłoszenie 53, '2024-01-02'
+EXEC DodajOgłoszenie 54,'2023-02-01'
+EXEC DodajOgłoszenie 55,'2023-02-01'
+
+
+Exec ZakupNieruchomości 2, '31072069990'
+
+--BŁĄD - zakup nieruchomości, która już jest sprzedana
+EXEC ZakupNieruchomości 45,'24102948963'
+
+
 EXEC DodajOpinię '22110855460',18, 10 ,'Wszystko super!'
 EXEC DodajOpinię '22110855460',18, 11 ,'Zbyt wysoka ocena'
 EXEC DodajOpinię '22110855460',18, 10 ,'Dodanie opini jeszcze raz'
 
-Exec ZakupNieruchomości 2, '31072069990'
-
-EXEC ZakupNieruchomości 45,'24102948963'
-/*/ Proba zakupu nieruchomosci ze sprzedane */
-
-
-EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, 2 , 1 , 1 , 1 , NULL, NULL, NULL,NULL
-EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 80,420000, 0 , 'apartament' , NULL , NULL , NULL, 3 , 1 , 1 , 1 , NULL, NULL, NULL,NULL
-EXEC DodajOgłoszenie 52, '2023-05-01'
-EXEC DodajOgłoszenie 53, '2024-01-02'
-/*/ Dodanie kilku mieszkan pod jednym adresem */
-
-EXEC DodajNieruchomość 'mieszkanie','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, NULL , 1 , 1 , 1 , NULL, NULL, NULL,NULL
---Brak wymaganego parametru
-
-EXEC DodajNieruchomość 'chalupa','Aleja Kijowska', 37 , 'Kraków', 61,542000, 0 , 'apartament' , NULL , NULL , NULL, NULL , 1 , 1 , 1 , NULL, NULL, NULL,NULL
---zly typ nieruchomosci
-
-
-EXEC DodajNieruchomość 'działka','Słoneczna', 68 , 'Kraków',100000 ,530123, 0 , 'budowlana' , NULL , NULL , NULL, NULL , NULL , NULL , NULL , 1, 1,1,1
-EXEC DodajOgłoszenie 54,'2023-02-01'
-
-EXEC DodajNieruchomość 'dom','Sosnowa', 31 , 'Częstochowa', 312,1104001, 1 , 'wolnostojący' , 15 , 2 , 'gaz', NULL , NULL , NULL , NULL , NULL, NULL, NULL,NULL
-EXEC DodajOgłoszenie 55,'2023-02-01'
 
 EXEC ZarezerwujTerminOglądania '08230862902', 51,  '2023-03-01 16:00:30', '2023-03-01 17:00:00'
 EXEC ZarezerwujTerminOglądania '20082281942', 51,  '2023-03-01 16:50:30', '2023-03-01 18:00:00'
@@ -62,8 +77,3 @@ EXEC ZakupNieruchomości 1,'31072069990'
 
 EXEC ZakupNieruchomości 1,'40071541277'
 --Zakup nieruchomosci zarezerwowanej
-
-
-
-
-
