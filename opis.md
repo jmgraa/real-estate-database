@@ -758,4 +758,17 @@ EXEC ZakupNieruchomości 1,'31072069990'
 EXEC ZakupNieruchomości 1,'40071541277'
 ```
 
+Gui posiada trzy etapy
+
+Logowanie do konta klienta lub pracownika
+![image](https://user-images.githubusercontent.com/69002597/215728733-e9a636d7-0275-48fb-a407-9c33fb8b9ccf.png)
+
+Wybór funkcji(Osobne dla klienta oraz pracownika)
+![image](https://user-images.githubusercontent.com/69002597/215729164-84796d03-b8d0-49c7-92f8-3e5e7bb9a1d7.png)
+
+Na ostatnim etapie należy wypełnić pola potrzebne do wykonania funkcji, procedury lub widoku.
+![image](https://user-images.githubusercontent.com/69002597/215729079-7e89ce53-bacc-4baa-a328-a740a4fb55bb.png)
+
+
+
 # [Skrypt tworzący bazę danych](create_database.sql)
