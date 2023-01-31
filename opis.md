@@ -758,7 +758,7 @@ EXEC ZakupNieruchomości 1,'31072069990'
 EXEC ZakupNieruchomości 1,'40071541277'
 ```
 
-Gui posiada trzy etapy
+Gui(HTML,CSS,PHP) posiada trzy etapy
 
 Logowanie do konta klienta lub pracownika
 ![image](https://user-images.githubusercontent.com/69002597/215728733-e9a636d7-0275-48fb-a407-9c33fb8b9ccf.png)
